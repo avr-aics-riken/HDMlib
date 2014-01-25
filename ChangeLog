@@ -1,0 +1,17 @@
+/*
+ * HDMlib - Hierarchical Data Management library
+ *
+ * Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+ * All rights reserved.
+ *
+ */
+
+
+REVISION HISTORY
+================
+
+------------------
+2014-01-25
+
+- r1 Check compile and package
+- r0 Initial commit
