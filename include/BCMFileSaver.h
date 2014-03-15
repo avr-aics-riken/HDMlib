@@ -22,6 +22,8 @@
 #include <Vec3.h>
 
 #include "BCMFileCommon.h"
+#include "IdxBlock.h"
+#include "IdxStep.h"
 
 class BCMOctree;
 class RootGrid;
@@ -163,6 +165,14 @@ namespace BCMFileIO {
 		/// 
 		bool SaveOctree(const std::string& filepath, const BCMOctree* octree);
 	
+		/// CellIDブロックを取得
+		/// 
+		/// @param[in] ib			インデックスブロック
+		/// @param[in] blockManager	BlockManager
+		/// 
+		/// @return CellIDブロックの先頭アドレス
+		/// 
+		unsigned char* GetCellIDBlock(const IdxBlock* ib, BlockManager& blockManager);
 	private:
 		BlockManager&          m_blockManager;   ///< ブロックマネージャ
 		const MPI::Intracomm&  m_comm;           ///< MPIコミュニケータ

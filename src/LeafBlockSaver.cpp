@@ -14,24 +14,25 @@
 #include "LeafBlockSaver.h"
 #include "BCMFileCommon.h"
 #include "BitVoxel.h"
-#include "RLE.h"
+#include "BCMRLE.h"
 #include "ErrorUtil.h"
+#include "Logger.h"
 
 #include "FileSystemUtil.h"
 
 #include "BlockManager.h"
 #include "Scalar3D.h"
 
-#include "type.h"
+#include "BCMTypes.h"
 
 namespace BCMFileIO {
 
-    bool Save_LeafBlock_CellID( const MPI::Intracomm& comm,
-	                            const IdxBlock*       ib,
-							    const Vec3i&          size,
-							    const size_t          numBlock,
-							    const unsigned char*  datas,
-							    bool                  rle )
+    bool LeafBlockSaver::SaveCellID( const MPI::Intracomm& comm,
+	                            	 const IdxBlock*       ib,
+							    	 const Vec3i&          size,
+							    	 const size_t          numBlock,
+							    	 const unsigned char*  datas,
+							    	 bool                  rle )
 	{
 		using namespace std;
 
@@ -55,7 +56,7 @@ namespace BCMFileIO {
 
 		// 自プロセスの担当ブロックをBitVoxel化
 		size_t bitVoxelSize = 0;
-		bitVoxelCell* bitVoxel = CompressBitVoxel(&bitVoxelSize, tsz, datas, ib->bitWidth);
+		bitVoxelCell* bitVoxel = BitVoxel::Compress(&bitVoxelSize, tsz, datas, ib->bitWidth);
 
 		// リーフブロックのCellIDヘッダを準備
 		LBCellIDHeader ch;
@@ -69,7 +70,7 @@ namespace BCMFileIO {
 		if( rle ){ // RLE圧縮の場合
 			size_t rleSize = 0;
 			// BitVoxelをRLE圧縮
-			rleBuf = rleEncode<bitVoxelCell, unsigned char>(bitVoxel, bvs, &rleSize);
+			rleBuf = BCMRLE::Encode<bitVoxelCell, unsigned char>(bitVoxel, bvs, &rleSize);
 			// リーフブロックのCellIDヘッダに圧縮サイズを記載
 			ch.compSize = rleSize;
 			dp = rleBuf;
@@ -115,7 +116,7 @@ namespace BCMFileIO {
 				string filepath = ib->rootDir + ib->dataDir + string(filename);
 				FILE *fp = NULL;
 				if( (fp = fopen(filepath.c_str(), "wb")) == NULL) {
-					LogE("fileopen error <%s>. [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+					Logger::Error("fileopen error <%s>. [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 					return false;
 				}
 				
@@ -158,7 +159,7 @@ namespace BCMFileIO {
 			string filepath = ib->rootDir + ib->dataDir + string(filename);
 			FILE *fp = NULL;
 			if( (fp = fopen(filepath.c_str(), "wb")) == NULL) {
-				LogE("fileopen error <%s>. [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+				Logger::Error("fileopen error <%s>. [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				return false;
 			}
 	
@@ -183,7 +184,7 @@ namespace BCMFileIO {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	template<typename T>
-	bool CopyScalar3DToBuffer(BlockManager& blockManager, const int dataClassID, const int dataID, const int vc, T* buf)
+	bool LeafBlockSaver::CopyScalar3DToBuffer(BlockManager& blockManager, const int dataClassID, const int dataID, const int vc, T* buf)
 	{
 		Vec3i size = blockManager.getSize();
 		
@@ -205,10 +206,10 @@ namespace BCMFileIO {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	template<typename T>
-	bool _Save_LeafBlock_Data(const MPI::Intracomm& comm,
-							  const IdxBlock*       ib, 
-							  BlockManager&         blockManager, 
-							  const unsigned int    step)
+	bool LeafBlockSaver::_SaveData(const MPI::Intracomm& comm,
+								   const IdxBlock*       ib, 
+								   BlockManager&         blockManager, 
+								   const unsigned int    step)
 	{
 		using namespace std;
 		int rank = comm.Get_rank();
@@ -236,7 +237,7 @@ namespace BCMFileIO {
 			outputDir += std::string(stepDirName);
 		}
 		
-		CreateDirectory(outputDir, outputDir.find("/") == 0 ? true : false);
+		FileSystemUtil::CreateDirectory(outputDir, outputDir.find("/") == 0 ? true : false);
 
 		FILE *fp = NULL;
 		char filename[128];
@@ -245,7 +246,7 @@ namespace BCMFileIO {
 		string filepath = outputDir + string(filename);
 		
 		if( (fp = fopen(filepath.c_str(), "wb")) == NULL){
-			LogE("fileopen err <%s>. [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+			Logger::Error("fileopen err <%s>. [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 			return false;
 		}
 
@@ -265,24 +266,24 @@ namespace BCMFileIO {
 		return true;
 	}
 
-	bool Save_LeafBlock_Data(const MPI::Intracomm& comm,
-							 const IdxBlock*       ib, 
-							 BlockManager&         blockManager, 
-							 const unsigned int    step)
+	bool LeafBlockSaver::SaveData(const MPI::Intracomm& comm,
+								  const IdxBlock*       ib, 
+								  BlockManager&         blockManager, 
+								  const unsigned int    step)
 	{
 		bool status = false;
-		if     ( ib->dataType == LB_INT8   ) { status = _Save_LeafBlock_Data< s8>(comm, ib, blockManager, step); }
-		else if( ib->dataType == LB_UINT8  ) { status = _Save_LeafBlock_Data< u8>(comm, ib, blockManager, step); }
-		else if( ib->dataType == LB_INT16  ) { status = _Save_LeafBlock_Data<s16>(comm, ib, blockManager, step); }
-		else if( ib->dataType == LB_UINT16 ) { status = _Save_LeafBlock_Data<u16>(comm, ib, blockManager, step); }
-		else if( ib->dataType == LB_INT32  ) { status = _Save_LeafBlock_Data<s32>(comm, ib, blockManager, step); }
-		else if( ib->dataType == LB_UINT32 ) { status = _Save_LeafBlock_Data<u32>(comm, ib, blockManager, step); }
-		else if( ib->dataType == LB_INT64  ) { status = _Save_LeafBlock_Data<s64>(comm, ib, blockManager, step); }
-		else if( ib->dataType == LB_UINT64 ) { status = _Save_LeafBlock_Data<u64>(comm, ib, blockManager, step); }
-		else if( ib->dataType == LB_FLOAT32) { status = _Save_LeafBlock_Data<f32>(comm, ib, blockManager, step); }
-		else if( ib->dataType == LB_FLOAT64) { status = _Save_LeafBlock_Data<f64>(comm, ib, blockManager, step); }
+		if     ( ib->dataType == LB_INT8   ) { status = _SaveData< s8>(comm, ib, blockManager, step); }
+		else if( ib->dataType == LB_UINT8  ) { status = _SaveData< u8>(comm, ib, blockManager, step); }
+		else if( ib->dataType == LB_INT16  ) { status = _SaveData<s16>(comm, ib, blockManager, step); }
+		else if( ib->dataType == LB_UINT16 ) { status = _SaveData<u16>(comm, ib, blockManager, step); }
+		else if( ib->dataType == LB_INT32  ) { status = _SaveData<s32>(comm, ib, blockManager, step); }
+		else if( ib->dataType == LB_UINT32 ) { status = _SaveData<u32>(comm, ib, blockManager, step); }
+		else if( ib->dataType == LB_INT64  ) { status = _SaveData<s64>(comm, ib, blockManager, step); }
+		else if( ib->dataType == LB_UINT64 ) { status = _SaveData<u64>(comm, ib, blockManager, step); }
+		else if( ib->dataType == LB_FLOAT32) { status = _SaveData<f32>(comm, ib, blockManager, step); }
+		else if( ib->dataType == LB_FLOAT64) { status = _SaveData<f64>(comm, ib, blockManager, step); }
 		else{
-			LogE("invalid DataType (%d)[%s:%d]\n", ib->dataType, __FILE__, __LINE__);
+			Logger::Error("invalid DataType (%d)[%s:%d]\n", ib->dataType, __FILE__, __LINE__);
 			return false;
 		}
 

@@ -27,6 +27,7 @@
 #include "BCMFileCommon.h"
 #include "BCMFileSaver.h"
 #include "LeafBlockSaver.h"
+#include "Logger.h"
 
 #include "Scalar3D.h"
 #include "Vector3D.h"
@@ -35,42 +36,11 @@
 
 namespace BCMFileIO {
 
-	unsigned char* GetCellIDBlock(const IdxBlock* ib, BlockManager& blockManager)
-	{
-		int vc = ib->vc;
-
-		const Vec3i size = blockManager.getSize();
-		const size_t numBlock = blockManager.getNumBlock();
-		const size_t tsz = (size.x + vc*2) * (size.y + vc*2) * (size.z + vc*2) * numBlock;
-
-		unsigned char* grids = new unsigned char[tsz];
-
-		for(int id = 0; id < numBlock; ++id){
-			BlockBase* block = blockManager.getBlock(id);
-
-			Scalar3D<unsigned char>* mesh = dynamic_cast< Scalar3D<unsigned char>* >(block->getDataClass(ib->dataClassID[0]));
-			unsigned char* data = mesh->getData();
-			Index3DS idx = mesh->getIndex();
-
-			Vec3i sz( size.x + vc*2, size.y + vc*2, size.z + vc*2);
-			for(int z = 0; z < sz.z; z++){
-				for(int y = 0; y < sz.y; y++){
-					for(int x = 0; x < sz.x; x++){
-						size_t loc = x + (y + (z + id * sz.z) * sz.y ) * sz.x;
-						grids[loc] = data[ idx( x-vc, y-vc, z-vc ) ];
-					}
-				}
-			}
-		}
-		return grids;
-	}
-
-
 	BCMFileSaver::BCMFileSaver( const Vec3r& globalOrigin, const Vec3r& globalRegion, const BCMOctree* octree, const std::string dir )
 	 : m_blockManager(BlockManager::getInstance()), m_comm(m_blockManager.getCommunicator()),
 	   m_octree(octree), m_globalOrigin(globalOrigin), m_globalRegion(globalRegion)
 	{
-		m_targetDir = FixDirectoryPath(dir);
+		m_targetDir = FileSystemUtil::FixDirectoryPath(dir);
 
 		m_unit.length   = std::string("NonDimensional");
 		m_unit.L0_scale = 1.0;
@@ -95,8 +65,8 @@ namespace BCMFileIO {
 	{
 		if(dataClassID < 0){ return false; }
 
-		if( findIdxBlock(m_idxBlockList, dataClassID) != NULL ){
-			LogE("dataClassID(%s) is already registerd [%s:%d]\n", dataClassID, __FILE__, __LINE__);
+		if( IdxBlock::find(m_idxBlockList, dataClassID) != NULL ){
+			Logger::Error("dataClassID(%s) is already registerd [%s:%d]\n", dataClassID, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -104,7 +74,7 @@ namespace BCMFileIO {
 		ib.dataClassID.resize(1);
 		ib.dataClassID[0] = dataClassID;
 		ib.rootDir     = m_targetDir;
-		ib.dataDir     = FixDirectoryPath(dataDir);
+		ib.dataDir     = FileSystemUtil::FixDirectoryPath(dataDir);
 		ib.kind        = LB_CELLID;
 		ib.dataType    = LB_UINT8;
 		ib.bitWidth    = bitWidth;
@@ -133,12 +103,12 @@ namespace BCMFileIO {
 		if(!dataClassID){ return false; }
 		for(int i = 0; i < static_cast<int>(kind); i++){
 			if(dataClassID[i] < 0){
-				LogE("dataClassID(%d) is invalid) [%s:%d]\n", dataClassID[i], __FILE__, __LINE__);
+				Logger::Error("dataClassID(%d) is invalid) [%s:%d]\n", dataClassID[i], __FILE__, __LINE__);
 				return false;
 			}
 
-			if( findIdxBlock(m_idxBlockList, dataClassID[i]) != NULL ){
-				LogE("dataClassID(%d) is already registerd [%s:%d]\n", dataClassID[i], __FILE__, __LINE__);
+			if( IdxBlock::find(m_idxBlockList, dataClassID[i]) != NULL ){
+				Logger::Error("dataClassID(%d) is already registerd [%s:%d]\n", dataClassID[i], __FILE__, __LINE__);
 				return false;
 			}
 		}
@@ -157,7 +127,7 @@ namespace BCMFileIO {
 		}
 
 		ib.rootDir      = m_targetDir;
-		ib.dataDir      = FixDirectoryPath(dataDir);
+		ib.dataDir      = FileSystemUtil::FixDirectoryPath(dataDir);
 		ib.kind         = kind;
 		ib.dataType     = dataType;
 		ib.bitWidth     = bitWidthTable[(int)dataType];
@@ -186,28 +156,28 @@ namespace BCMFileIO {
 
 		string octFilename("tree.oct");
 		string octFilepath = m_targetDir + octFilename;
-		//if( m_comm.Get_rank() == 0) LogI("Output Files are : IDX[%s], OCT[%s]\n", idxFilepath.c_str(), octFilepath.c_str());
+		//if( m_comm.Get_rank() == 0) Logger::Info("Output Files are : IDX[%s], OCT[%s]\n", idxFilepath.c_str(), octFilepath.c_str());
 
 		bool err = false;
 
 		if( m_comm.Get_rank() == 0 ){
-			err = !CreateDirectory(m_targetDir, m_targetDir.find("/") == 0 ? true : false);
+			err = !FileSystemUtil::CreateDirectory(m_targetDir, m_targetDir.find("/") == 0 ? true : false);
 		}else{
 			err = false;
 		}
-		if( reduceError(err) ){
+		if( ErrorUtil::reduceError(err) ){
 			return false;
 		}
 
-		err = reduceError( !SaveIndex(octFilename, m_octree->getNumLeafNode()) );
+		err = ErrorUtil::reduceError( !SaveIndex(octFilename, m_octree->getNumLeafNode()) );
 		if( err ){
-			LogE("faild to save index file. [%s:%d]\n", __FILE__, __LINE__);
+			Logger::Error("faild to save index file. [%s:%d]\n", __FILE__, __LINE__);
 			return false;
 		}
 
-		err = reduceError( !SaveOctree(octFilepath, m_octree) );
+		err = ErrorUtil::reduceError( !SaveOctree(octFilepath, m_octree) );
 		if( err ){
-			LogE("faild to save octree file. [%s:%d]\n", __FILE__, __LINE__);
+			Logger::Error("faild to save octree file. [%s:%d]\n", __FILE__, __LINE__);
 			return false;
 		}
 
@@ -221,27 +191,27 @@ namespace BCMFileIO {
 
 		bool err = false;
 
-		IdxBlock *ib = findIdxBlock(m_idxBlockList, name);
+		IdxBlock *ib = IdxBlock::find(m_idxBlockList, name);
 
 		if( ib == NULL ){
-			LogE("%s is not registerd. [%s:%d]\n", name, __FILE__, __LINE__);
+			Logger::Error("%s is not registerd. [%s:%d]\n", name, __FILE__, __LINE__);
 			err = true;
 		}
 
-		if( reduceError(err) ){ return false; }
+		if( ErrorUtil::reduceError(err) ){ return false; }
 		err = false;
 
 		if( ib->kind == LB_CELLID )
 		{
 			string lbdir = ib->rootDir + ib->dataDir;
 			if( ib->isGather ){
-				if( m_comm.Get_rank() == 0 ) err = !CreateDirectory(lbdir, lbdir.find("/") == 0 ? true : false);
+				if( m_comm.Get_rank() == 0 ) err = !FileSystemUtil::CreateDirectory(lbdir, lbdir.find("/") == 0 ? true : false);
 			}else{
-				err = !CreateDirectory(lbdir, lbdir.find("/") == 0 ? true : false);
+				err = !FileSystemUtil::CreateDirectory(lbdir, lbdir.find("/") == 0 ? true : false);
 			}
 
-			if( reduceError(err) ){ 
-				LogE("Cannot Create Output Directory (%s) [%s:%d]\n", lbdir.c_str(), __FILE__, __LINE__);
+			if( ErrorUtil::reduceError(err) ){ 
+				Logger::Error("Cannot Create Output Directory (%s) [%s:%d]\n", lbdir.c_str(), __FILE__, __LINE__);
 				return false;
 			}
 
@@ -250,24 +220,24 @@ namespace BCMFileIO {
 				err = true;
 			} else {
 #ifdef ENABLE_RLE_ENCODE
-				err = !Save_LeafBlock_CellID(m_comm, ib, m_blockManager.getSize(), m_blockManager.getNumBlock(), data, true);
+				err = !LeafBlockSaver::SaveCellID(m_comm, ib, m_blockManager.getSize(), m_blockManager.getNumBlock(), data, true);
 #else
-				err = !Save_LeafBlock_CellID(m_comm, ib, m_blockManager.getSize(), m_blockManager.getNumBlock(), data, false);
+				err = !LeafBlockSaver::SaveCellID(m_comm, ib, m_blockManager.getSize(), m_blockManager.getNumBlock(), data, false);
 #endif // ENABLE_RLE_ENCODE
 				delete [] data;
 			}
 
-			if( reduceError(err) ){
-				LogE("Save Leaf Block (CellID) [%s:%d]\n", __FILE__, __LINE__);
+			if( ErrorUtil::reduceError(err) ){
+				Logger::Error("Save Leaf Block (CellID) [%s:%d]\n", __FILE__, __LINE__);
 				return false;
 			}
 		}
 		else
 		{
-			err = !Save_LeafBlock_Data(m_comm, ib, m_blockManager, step);
+			err = !LeafBlockSaver::SaveData(m_comm, ib, m_blockManager, step);
 
-			if( reduceError(err) ){
-				LogE("Save Leaf Block (Scalar) [%s:%d]\n", __FILE__, __LINE__);
+			if( ErrorUtil::reduceError(err) ){
+				Logger::Error("Save Leaf Block (Scalar) [%s:%d]\n", __FILE__, __LINE__);
 				return false;
 			}
 		}
@@ -346,7 +316,7 @@ namespace BCMFileIO {
 
 		ofstream ofs(filepath.c_str());
 		if( !ofs ){
-			LogE("failed to open file (%s) .[%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+			Logger::Error("failed to open file (%s) .[%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 			for(int i = 0; i < m_comm.Get_size(); i++) delete [] hostnameList[i];
 			delete hostnameList;
 			return false;
@@ -414,7 +384,7 @@ namespace BCMFileIO {
 		std::string filepath = m_targetDir + std::string("cellid.bcm");
 		ofstream ofs( filepath.c_str() );
 		if( !ofs ){
-			LogE("failed to open file (%s) .[%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+			Logger::Error("failed to open file (%s) .[%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 			return false;
 		}
 		
@@ -508,7 +478,7 @@ namespace BCMFileIO {
 		std::string filepath = m_targetDir + std::string("data.bcm");
 		ofstream ofs( filepath.c_str() );
 		if( !ofs ){
-			LogE("failed to open file (%s) .[%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+			Logger::Error("failed to open file (%s) .[%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 			return false;
 		}
 		
@@ -522,7 +492,7 @@ namespace BCMFileIO {
 		using namespace std;
 
 		if( numLeaf < m_comm.Get_size() ){
-			LogE("less number of leafs than number of procs. [%s:%d]\n", __FILE__, __LINE__);
+			Logger::Error("less number of leafs than number of procs. [%s:%d]\n", __FILE__, __LINE__);
 			return false;
 		}
 		
@@ -534,9 +504,9 @@ namespace BCMFileIO {
 
 		std::string procName("proc.bcm");
 		std::string procPath = m_targetDir + procName;
-		if( reduceError(!SaveIndexProc(procPath, part)) )      { LogE("%s:%s:%d\n", __func__, __FILE__, __LINE__); return false; }
-		if( reduceError(!SaveIndexCellID(procName, octName)) ) { LogE("%s:%s:%d\n", __func__, __FILE__, __LINE__); return false; }
-		if( reduceError(!SaveIndexData(procName, octName)) )   { LogE("%s:%s:%d\n", __func__, __FILE__, __LINE__); return false; }
+		if( ErrorUtil::reduceError(!SaveIndexProc(procPath, part)) )      { Logger::Error("%s:%s:%d\n", __func__, __FILE__, __LINE__); return false; }
+		if( ErrorUtil::reduceError(!SaveIndexCellID(procName, octName)) ) { Logger::Error("%s:%s:%d\n", __func__, __FILE__, __LINE__); return false; }
+		if( ErrorUtil::reduceError(!SaveIndexData(procName, octName)) )   { Logger::Error("%s:%s:%d\n", __func__, __FILE__, __LINE__); return false; }
 
 		return true;
 	}
@@ -551,7 +521,7 @@ namespace BCMFileIO {
 		
 		FILE *fp = NULL;
 		if( (fp = fopen(filepath.c_str(), "wb")) == NULL ){
-			LogE("faild open file (%s) .[%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+			Logger::Error("faild open file (%s) .[%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 			return false;
 		}
 
@@ -593,6 +563,35 @@ namespace BCMFileIO {
 		return true;
 	}
 
+	unsigned char* BCMFileSaver::GetCellIDBlock(const IdxBlock* ib, BlockManager& blockManager)
+	{
+		int vc = ib->vc;
+
+		const Vec3i size = blockManager.getSize();
+		const size_t numBlock = blockManager.getNumBlock();
+		const size_t tsz = (size.x + vc*2) * (size.y + vc*2) * (size.z + vc*2) * numBlock;
+
+		unsigned char* grids = new unsigned char[tsz];
+
+		for(int id = 0; id < numBlock; ++id){
+			BlockBase* block = blockManager.getBlock(id);
+
+			Scalar3D<unsigned char>* mesh = dynamic_cast< Scalar3D<unsigned char>* >(block->getDataClass(ib->dataClassID[0]));
+			unsigned char* data = mesh->getData();
+			Index3DS idx = mesh->getIndex();
+
+			Vec3i sz( size.x + vc*2, size.y + vc*2, size.z + vc*2);
+			for(int z = 0; z < sz.z; z++){
+				for(int y = 0; y < sz.y; y++){
+					for(int x = 0; x < sz.x; x++){
+						size_t loc = x + (y + (z + id * sz.z) * sz.y ) * sz.x;
+						grids[loc] = data[ idx( x-vc, y-vc, z-vc ) ];
+					}
+				}
+			}
+		}
+		return grids;
+	}
 
 } // namespace BCMFileIO
 

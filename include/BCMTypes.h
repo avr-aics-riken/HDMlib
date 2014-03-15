@@ -7,12 +7,12 @@
  */
 
 ///
-/// @file  type.h
+/// @file  BCMTypes.h
 /// @brief クロスプラットホームのデータ型宣言
 ///
 
-#ifndef __BCMTOOLS_FILEIO_TYPE_H__
-#define __BCMTOOLS_FILEIO_TYPE_H__
+#ifndef __BCMTOOLS_BCMTYPES_H__
+#define __BCMTOOLS_BCMTYPES_H__
 
 
 #ifdef _WIN32
@@ -42,4 +42,4 @@ typedef uint64_t      u64;  ///< 符号なし64bit整数型
 typedef float         f32;  ///< 32bit浮動小数点 (単精度浮動小数点)
 typedef double        f64;  ///< 64bit浮動小数点 (倍精度浮動小数点)
 
-#endif // __BCMTOOLS_FILEIO_TYPE_H__
+#endif // __BCMTOOLS_BCMTYPES_H__

@@ -7,7 +7,7 @@
  */
 
 /**
- * @file   hdm_Version.h
+ * @file   hdmVersion.h
  * HDMバージョン情報のヘッダーファイル
  */
 
@@ -15,10 +15,10 @@
 #define _HDM_VERSION_H_
 
 /** HDMライブラリのバージョン */
-#define HDM_VERSION_NO  "@PACKAGE_VERSION@"
+#define HDM_VERSION_NO  "0.2.0"
 
 /** HDMライブラリのリビジョン */
-#define HDM_REVISION    "@HDM_REVISION@"
+#define HDM_REVISION    "20140315_1630"
 
 #endif /* _HDM_VERSION_H_ */
 

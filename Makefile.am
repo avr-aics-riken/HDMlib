@@ -13,7 +13,7 @@ SUBDIRS = @MAKE_SUB_DIRS@
 
 bin_SCRIPTS = hdm-config
 CLEANFILES = $(bin_SCRIPTS)
-EXTRA_DIST = hdm-config.in LICENSE include/mpi_stubs.h examples doc README.md
+EXTRA_DIST = hdm-config.in LICENSE examples doc README.md
 dist_data_DATA = AUTHORS COPYING ChangeLog README LICENSE
 dist_include_HEADERS = include/mpi_stubs.h
 
@@ -25,4 +25,3 @@ clean-local:
 distclean-local: clean-local
 	rm -f ./bin/*
 	rm -f ./lib/*
-
