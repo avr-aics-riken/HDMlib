@@ -41,7 +41,8 @@ HDM_include_HEADERS = \
     $(top_builddir)/include/LeafBlockLoader.h \
     $(top_builddir)/include/LeafBlockSaver.h \
     $(top_builddir)/include/Logger.h \
-    $(top_builddir)/include/PartitionMapper.h
+    $(top_builddir)/include/PartitionMapper.h \
+    $(top_builddir)/include/Vec3.h
 
 HDM_inline_includedir = $(includedir)/inline
 HDM_inline_include_HEADERS =

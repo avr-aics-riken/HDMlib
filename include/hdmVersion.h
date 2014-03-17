@@ -15,10 +15,10 @@
 #define _HDM_VERSION_H_
 
 /** HDMライブラリのバージョン */
-#define HDM_VERSION_NO  "0.2.0"
+#define HDM_VERSION_NO  "0.3.0"
 
 /** HDMライブラリのリビジョン */
-#define HDM_REVISION    "20140315_1630"
+#define HDM_REVISION    "20140317_1650"
 
 #endif /* _HDM_VERSION_H_ */
 

@@ -9,8 +9,9 @@
  *
  */
 
-#include <iostream>
 #include "mpi.h"
+#include <iostream>
+#include "Vec3.h"
 #include "BCMTools.h"
 #include "Config.h"
 #include "RootGrid.h"
@@ -30,6 +31,7 @@
 #include "BCMFileSaver.h"
 #include "BCMFileCommon.h"
 
+using namespace Vec3class;
 
 template <typename T>
 void print(const char* prefix, const int dcid, const int vc = 0){
@@ -104,8 +106,8 @@ bool SetScalarData(const int dataClassId, const int vc, const unsigned int step)
 		T* data = mesh->getData();
 		Index3DS idx = mesh->getIndex();
 
-		const Vec3r& org = block->getOrigin();
-		const Vec3r& pitch = block->getCellSize();
+		const Vec3d& org = block->getOrigin();
+		const Vec3d& pitch = block->getCellSize();
 
 		for(int z = -vc; z < sz.z + vc; z++){
 			for(int y = -vc; y < sz.y + vc; y++){
@@ -138,8 +140,8 @@ bool SetVectorData(const int dataClassId[3], const int vc, const unsigned int st
 		T* data[3]            = {  meshU->getData(),  meshV->getData(),  meshW->getData() };
 		const Index3DS idx[3] = { meshU->getIndex(), meshV->getIndex(), meshW->getIndex() };
 
-		const Vec3r& org = block->getOrigin();
-		const Vec3r& pitch = block->getCellSize();
+		const Vec3d& org = block->getOrigin();
+		const Vec3d& pitch = block->getCellSize();
 
 		for(int z = -vc; z < sz.z + vc; z++){
 			for(int y = -vc; y < sz.y + vc; y++){
@@ -163,7 +165,7 @@ bool SetVectorData(const int dataClassId[3], const int vc, const unsigned int st
 }
 
 BoundingBox defineSearchRegion(const Pedigree& pedigree, int maxLevel, 
-                               const Vec3r& origin, const double rootLength, const RootGrid* rootGrid)
+                               const Vec3d& origin, const double rootLength, const RootGrid* rootGrid)
 {
 	int level = pedigree.getLevel();
 	int px = pedigree.getX();
@@ -371,13 +373,13 @@ int main(int argc, char** argv)
 		Pedigree p = leafNodeArray[lid]->getPedigree();
 		int lv = p.getLevel();
 
-		Vec3r rootRegion(conf.rootLength, conf.rootLength, conf.rootLength);
-		Vec3r rootOrg(conf.origin.x + (rootRegion.x * rootGrid->rootID2indexX(p.getRootID())),
+		Vec3d rootRegion(conf.rootLength, conf.rootLength, conf.rootLength);
+		Vec3d rootOrg(conf.origin.x + (rootRegion.x * rootGrid->rootID2indexX(p.getRootID())),
 		              conf.origin.y + (rootRegion.y * rootGrid->rootID2indexY(p.getRootID())),
 					  conf.origin.z + (rootRegion.z * rootGrid->rootID2indexZ(p.getRootID())));
 
-		Vec3r rgn( rootRegion.x / (1 << lv),     rootRegion.y / (1 << lv),     rootRegion.z / (1 << lv));
-		Vec3r org( rootOrg.x + p.getX() * rgn.x, rootOrg.y + p.getY() * rgn.y, rootOrg.z + p.getZ() * rgn.z);
+		Vec3d rgn( rootRegion.x / (1 << lv),     rootRegion.y / (1 << lv),     rootRegion.z / (1 << lv));
+		Vec3d org( rootOrg.x + p.getX() * rgn.x, rootOrg.y + p.getY() * rgn.y, rootOrg.z + p.getZ() * rgn.z);
 
 		const std::string& polygonGroup = conf.polygonGroupList[0].polygonGroupName;
 		int nPolygons = 0;
@@ -424,8 +426,8 @@ int main(int argc, char** argv)
 	//print<unsigned char>("cid", id_cellId, conf.vc);
 
 	// ファイル出力用にGlobalOrigin / GlobalRegionを設定
-	Vec3r origin = conf.origin;
-	Vec3r region( conf.rootLength * conf.rootN.x,
+	Vec3d origin = conf.origin;
+	Vec3d region( conf.rootLength * conf.rootN.x,
 	              conf.rootLength * conf.rootN.y,
 				  conf.rootLength * conf.rootN.z);
 	

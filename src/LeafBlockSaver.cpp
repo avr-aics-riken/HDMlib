@@ -24,15 +24,18 @@
 #include "Scalar3D.h"
 
 #include "BCMTypes.h"
+#include "Vec3.h"
+
+using namespace Vec3class;
 
 namespace BCMFileIO {
 
-    bool LeafBlockSaver::SaveCellID( const MPI::Intracomm& comm,
-	                            	 const IdxBlock*       ib,
-							    	 const Vec3i&          size,
-							    	 const size_t          numBlock,
-							    	 const unsigned char*  datas,
-							    	 bool                  rle )
+    bool LeafBlockSaver::SaveCellID(const MPI::Intracomm& comm,
+                                    const IdxBlock*       ib,
+                                    const Vec3i&          size,
+                                    const size_t          numBlock,
+                                    const unsigned char*  datas,
+                                    bool                  rle )
 	{
 		using namespace std;
 

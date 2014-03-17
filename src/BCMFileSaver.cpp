@@ -32,11 +32,15 @@
 #include "Scalar3D.h"
 #include "Vector3D.h"
 
+#include "Vec3.h"
+
 #define ENABLE_RLE_ENCODE
+
+using namespace Vec3class;
 
 namespace BCMFileIO {
 
-	BCMFileSaver::BCMFileSaver( const Vec3r& globalOrigin, const Vec3r& globalRegion, const BCMOctree* octree, const std::string dir )
+	BCMFileSaver::BCMFileSaver( const Vec3d& globalOrigin, const Vec3d& globalRegion, const BCMOctree* octree, const std::string dir )
 	 : m_blockManager(BlockManager::getInstance()), m_comm(m_blockManager.getCommunicator()),
 	   m_octree(octree), m_globalOrigin(globalOrigin), m_globalRegion(globalRegion)
 	{
@@ -89,16 +93,16 @@ namespace BCMFileIO {
 		return true;
 	}
 
-	bool BCMFileSaver::RegisterDataInformation( const int          *dataClassID,
-	                                            const LB_KIND       kind,
-										        const LB_DATA_TYPE  dataType,
-												const short         vc,
-										        const std::string&  name,
-										        const std::string&  prefix,
-										        const std::string&  extension,
-										        const IdxStep&      step,
-												const std::string&  dataDir,
-												const bool          stepSubDir )
+	bool BCMFileSaver::RegisterDataInformation(const int          *dataClassID,
+                                             const LB_KIND       kind,
+                                             const LB_DATA_TYPE  dataType,
+                                             const short         vc,
+                                             const std::string&  name,
+                                             const std::string&  prefix,
+                                             const std::string&  extension,
+                                             const IdxStep&      step,
+                                             const std::string&  dataDir,
+                                             const bool          stepSubDir )
 	{
 		if(!dataClassID){ return false; }
 		for(int i = 0; i < static_cast<int>(kind); i++){

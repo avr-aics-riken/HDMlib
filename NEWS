@@ -11,6 +11,10 @@ RELEASE
 =======
 
 -------------
+Version 0.3.0   2014-03-17
+ - common namespace Vec3class
+
+-------------
 Version 0.2.0   2014-03-15
  - class library
 

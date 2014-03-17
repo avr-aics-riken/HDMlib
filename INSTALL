@@ -42,7 +42,7 @@ Configure options:
 
  --with-parser=TEXTPARSER_PATH
     Specify the directory path that TextParser library is installed.
-
+    
  --without-MPI=(yes|no)
     If you compile CIO library for parallel environment with MPI library, specify 'yes',
     otherwise 'no'.

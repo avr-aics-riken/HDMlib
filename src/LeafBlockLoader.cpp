@@ -21,6 +21,9 @@
 #include "Logger.h"
 
 #include "BCMTypes.h"
+#include "Vec3.h"
+
+using namespace Vec3class;
 
 namespace BCMFileIO {
 
@@ -28,7 +31,7 @@ namespace BCMFileIO {
 
 	inline void DUMMY(void*){}
 
-	inline size_t LeafBlockLoader::GetBitVoxelSize( const LBHeader& hdr, size_t numBlocks ){
+	inline size_t LeafBlockLoader::GetBitVoxelSize( const LBHeader& hdr, size_t numBlocks ) {
 		size_t blockSize = (hdr.size[0] + hdr.vc * 2) * (hdr.size[1] + hdr.vc * 2) * (hdr.size[2] + hdr.vc * 2);
 		return BitVoxel::GetSize(blockSize * numBlocks, hdr.bitWidth);
 	}

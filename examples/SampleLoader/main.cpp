@@ -20,6 +20,9 @@
 #include "BCMFileLoader.h"
 
 #include "BCMFileSaver.h"
+#include "Vec3.h"
+
+using namespace Vec3class;
 
 template <typename T>
 void print(const char* prefix, const int dcid, const int vc = 0){

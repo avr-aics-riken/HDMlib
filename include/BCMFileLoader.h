@@ -19,12 +19,14 @@
 #include <string>
 #include <vector>
 
-#include <Vec3.h>
+#include "Vec3.h"
 
 #include "BCMFileCommon.h"
 #include "IdxBlock.h"
 #include "IdxStep.h"
 #include "Pedigree.h"
+
+using namespace Vec3class;
 
 class BlockManager;
 class BCMOctree;
@@ -107,13 +109,13 @@ namespace BCMFileIO {
 		///
 		/// @return 原点座標
 		///
-		Vec3r GetGlobalOrigin() const { return m_globalOrigin; }
+		Vec3d GetGlobalOrigin() const { return m_globalOrigin; }
 
 		/// 領域全体の長さを返す．
 		///
 		/// @return 領域の長さ
 		///
-		Vec3r GetGlobalRegion() const { return m_globalRegion; }
+		Vec3d GetGlobalRegion() const { return m_globalRegion; }
 		
 		/// タイムステップ情報を取得
 		///
@@ -150,7 +152,7 @@ namespace BCMFileIO {
 		/// @return 成功した場合true, 失敗した場合false
 		///
 		bool LoadIndex(const std::string& filename, 
-		               Vec3r& globalOrigin, Vec3r& globalRegion, 
+		               Vec3d& globalOrigin, Vec3d& globalRegion, 
 					   std::string& octreeFilename, Vec3i& blockSize,
 					   std::vector<IdxProc>& idxProcList, std::vector<IdxBlock>& idxBlockList);
 
@@ -202,12 +204,12 @@ namespace BCMFileIO {
 		/// @return 負: str1 < str2、ゼロ: str1 == str2、正: str1 > str2
 		inline int CompStr( const std::string& str1, const std::string& str2, bool ignorecase=true );
 
-		/// Vec3r型のデータ読み込み
+		/// Vec3d型のデータ読み込み
 		/// @param[in]  tp		テキストパーサ
 		/// @param[in]  label   ラベル
-		/// @param[out] v		Vec3r
+		/// @param[out] v		Vec3d
 		/// @return == TP_NO_ERROR: 正常終了、!= TP_NO_ERROR: エラー終了
-		int ReadVec3( TextParser* tp, const std::string& label, Vec3r& v);
+		int ReadVec3( TextParser* tp, const std::string& label, Vec3d& v);
 
 		/// Vec3i型のデータ読み込み
 		/// @param[in]  tp		テキストパーサ
@@ -246,8 +248,8 @@ namespace BCMFileIO {
 		std::vector<IdxBlock> m_idxBlockList;  ///< ブロック情報リスト
 		IdxUnit               m_unit;          ///< 単位系
 
-		Vec3r m_globalOrigin;                  ///< 領域全体の原点座標
-		Vec3r m_globalRegion;                  ///< 領域全体の長さ
+		Vec3d m_globalOrigin;                  ///< 領域全体の原点座標
+		Vec3d m_globalRegion;                  ///< 領域全体の長さ
 
 		BCMOctree *m_octree;                   ///< Octree
 		

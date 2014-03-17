@@ -11,6 +11,10 @@ REVISION HISTORY
 ================
 
 ------------------
+2014-03-17
+- r3 common namespace of Vec3class [ver 0.3.0]
+
+------------------
 2014-03-15
 - r2 class library package [ver 0.2.0]
 

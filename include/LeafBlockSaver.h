@@ -20,6 +20,8 @@
 #include "IdxBlock.h"
 #include "Vec3.h"
 
+using namespace Vec3class;
+
 class BlockManager;
 
 namespace BCMFileIO {

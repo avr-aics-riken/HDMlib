@@ -15,6 +15,7 @@
 #define __BCMTOOLS_BCMTYPES_H__
 
 
+
 #ifdef _WIN32
 
 typedef short          int16_t;
@@ -41,5 +42,6 @@ typedef int64_t       s64;  ///< 符号付き64bit整数型
 typedef uint64_t      u64;  ///< 符号なし64bit整数型
 typedef float         f32;  ///< 32bit浮動小数点 (単精度浮動小数点)
 typedef double        f64;  ///< 64bit浮動小数点 (倍精度浮動小数点)
+
 
 #endif // __BCMTOOLS_BCMTYPES_H__

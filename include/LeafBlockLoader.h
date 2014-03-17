@@ -21,6 +21,9 @@
 #include "PartitionMapper.h"
 #include "BlockManager.h"
 #include "Scalar3D.h"
+#include "Vec3.h"
+
+using namespace Vec3class;
 
 namespace BCMFileIO {
 
