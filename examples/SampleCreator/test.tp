@@ -1,0 +1,10 @@
+Polylib {
+	root {
+		class_name = "PolygonGroup"
+		ducky {
+			class_name = "PolygonGroup"
+			filepath = "./pato.stl"
+			id = "1"
+		}
+	}
+}

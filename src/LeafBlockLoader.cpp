@@ -16,20 +16,27 @@
 
 #include "LeafBlockLoader.h"
 #include "BitVoxel.h"
-#include "RLE.h"
+#include "BCMRLE.h"
 #include "ErrorUtil.h"
+#include "Logger.h"
 
-#include "type.h"
+#include "BCMTypes.h"
+#include "Vec3.h"
+
+using namespace Vec3class;
 
 namespace BCMFileIO {
+
+	typedef LeafBlockLoader::CellIDCapsule CellIDCapsule;
+
 	inline void DUMMY(void*){}
 
-	inline size_t GetBitVoxelSize( const LBHeader& hdr, size_t numBlocks ){
+	inline size_t LeafBlockLoader::GetBitVoxelSize( const LBHeader& hdr, size_t numBlocks ) {
 		size_t blockSize = (hdr.size[0] + hdr.vc * 2) * (hdr.size[1] + hdr.vc * 2) * (hdr.size[2] + hdr.vc * 2);
-		return GetBitVoxelSize(blockSize * numBlocks, hdr.bitWidth);
+		return BitVoxel::GetSize(blockSize * numBlocks, hdr.bitWidth);
 	}
 
-	inline bool Load_LeafBlock_Header( FILE *fp, LBHeader& hdr, bool& isNeedSwap)
+	inline bool LeafBlockLoader::LoadHeader( FILE *fp, LBHeader& hdr, bool& isNeedSwap)
 	{
 		fread(&hdr, sizeof(LBHeader), 1, fp);
 
@@ -50,13 +57,13 @@ namespace BCMFileIO {
 			BSwap64(&hdr.numBlock);
 		}
 
-		//LogI("Header [bw : %d, vc : %d, sz : (%3d, %3d, %3d), nb : %d\n", 
+		//Logger::Info("Header [bw : %d, vc : %d, sz : (%3d, %3d, %3d), nb : %d\n", 
 		//       hdr.bitWidth, hdr.vc, hdr.size[0], hdr.size[1], hdr.size[2], hdr.numBlock);
 
 		return true;
 	}
 
-	inline bool Load_LeafBlock_CellIDHeader( FILE *fp, LBCellIDHeader& chdr, const bool isNeedSwap )
+	inline bool LeafBlockLoader::LoadCellIDHeader( FILE *fp, LBCellIDHeader& chdr, const bool isNeedSwap )
 	{
 		fread(&chdr, sizeof(LBCellIDHeader), 1, fp);
 		if( isNeedSwap ){
@@ -64,13 +71,13 @@ namespace BCMFileIO {
 			BSwap64(&chdr.compSize);
 		}
 		if(chdr.compSize != 0 && (chdr.compSize % sizeof(GridRleCode)) != 0){
-			LogE("compress size is invalid\n");
+			Logger::Error("compress size is invalid\n");
 			return false;
 		}
 		return true;
 	}
 	
-	inline bool Load_LeafBlock_CellIDData( FILE *fp, unsigned char** data, const LBHeader& hdr, const LBCellIDHeader& chdr, const bool isNeedSwap)
+	inline bool LeafBlockLoader::LoadCellIDData( FILE *fp, unsigned char** data, const LBHeader& hdr, const LBCellIDHeader& chdr, const bool isNeedSwap)
 	{
 		size_t sz = 0;
 		if( chdr.compSize == 0 ){
@@ -101,12 +108,12 @@ namespace BCMFileIO {
 		return true;
 	}
 
-	bool Load_LeafBlock_CellID( const std::string&          dir, 
-	                            const IdxBlock*             ib, 
-							    const MPI::Intracomm&       comm, 
-							    PartitionMapper*            pmapper,
-							    LBHeader&                   header, 
-							    std::vector<CellIDCapsule>& cidCapsules )
+	bool LeafBlockLoader::LoadCellID( const std::string&          dir, 
+									  const IdxBlock*             ib, 
+									  const MPI::Intracomm&       comm, 
+									  PartitionMapper*            pmapper,
+									  LBHeader&                   header, 
+									  std::vector<CellIDCapsule>& cidCapsules )
 	{
 		using namespace std;
 
@@ -126,7 +133,7 @@ namespace BCMFileIO {
 
 			FILE *fp = NULL;
 			if( (fp = fopen(filepath.c_str(), "rb")) == NULL ){
-				LogE("file open error \"%s\" [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+				Logger::Error("file open error \"%s\" [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				err = true;
 				break;
 			}
@@ -135,26 +142,26 @@ namespace BCMFileIO {
 			
 			LBHeader hdr;
 
-			if( !Load_LeafBlock_Header(fp, hdr, isNeedSwap) ){
-				LogE("%s is not leafBlock file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+			if( !LoadHeader(fp, hdr, isNeedSwap) ){
+				Logger::Error("%s is not leafBlock file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				fclose(fp); err = true; break;
 			}
 
 			if(hdr.kind != static_cast<unsigned char>(LB_CELLID)){
-				LogE("%s is not CellID file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+				Logger::Error("%s is not CellID file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				fclose(fp); err = true; break;
 			}
 			if(hdr.bitWidth < 1 && header.bitWidth > 5) {
-				LogE("%s is not CEllID file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+				Logger::Error("%s is not CEllID file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				fclose(fp); err = true; break;
 			}
 
 			CellIDCapsule cc;
-			if( !Load_LeafBlock_CellIDHeader(fp, cc.header, isNeedSwap) ){
+			if( !LoadCellIDHeader(fp, cc.header, isNeedSwap) ){
 				fclose(fp); err = true; break;
 			}
 			
-			Load_LeafBlock_CellIDData(fp, &cc.data, hdr, cc.header, isNeedSwap);
+			LoadCellIDData(fp, &cc.data, hdr, cc.header, isNeedSwap);
 
 			cidCapsules.push_back(cc);
 			header = hdr;
@@ -162,7 +169,7 @@ namespace BCMFileIO {
 		}
 
 		if( err ){
-			LogE("Clear cidCapsules [%s:%d]\n", __FILE__, __LINE__);
+			Logger::Error("Clear cidCapsules [%s:%d]\n", __FILE__, __LINE__);
 			// データロードに失敗したためロード済みのデータを破棄
 			for(vector<CellIDCapsule>::iterator it = cidCapsules.begin(); it != cidCapsules.end(); ++it){
 				if( it->data != NULL) delete [] it->data;
@@ -174,12 +181,12 @@ namespace BCMFileIO {
 		return true;
 	}
 
-	bool Load_LeafBlock_CellID_Gather( const std::string&        dir, 
-	                                   const IdxBlock*           ib, 
-									   const MPI::Intracomm&     comm, 
-									   PartitionMapper*          pmapper,
-							           LBHeader&                 header, 
-									   std::vector<CellIDCapsule>& cidCapsules )
+	bool LeafBlockLoader::LoadCellID_Gather( const std::string&        dir, 
+													const IdxBlock*           ib, 
+													const MPI::Intracomm&     comm, 
+													PartitionMapper*          pmapper,
+													LBHeader&                 header, 
+													std::vector<CellIDCapsule>& cidCapsules )
 	{
 		using namespace std;
 
@@ -207,22 +214,22 @@ namespace BCMFileIO {
 			
 			LBHeader hdr;
 
-			if( !Load_LeafBlock_Header(fp, hdr, isNeedSwap) ){
-				LogE("%s is not leafBlock file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+			if( !LoadHeader(fp, hdr, isNeedSwap) ){
+				Logger::Error("%s is not leafBlock file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				// ファイルロードエラーを全プロセスに通知
 				unsigned char loadError = 1; comm.Bcast(&loadError, 1, MPI::CHAR, 0);
 				fclose(fp); return false;
 			}
 
 			if(hdr.kind != static_cast<unsigned char>(LB_CELLID)){
-				LogE("%s is not Grid file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+				Logger::Error("%s is not Grid file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				// ファイルロードエラーを全プロセスに通知
 				unsigned char loadError = 1; comm.Bcast(&loadError, 1, MPI::CHAR, 0);
 				fclose(fp); return false;
 			}
 
 			if(hdr.bitWidth < 1 && header.bitWidth > 5) {
-				LogE("%s is not Grid file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+				Logger::Error("%s is not Grid file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				// ファイルロードエラーを全プロセスに通知
 				unsigned char loadError = 1; comm.Bcast(&loadError, 1, MPI::CHAR, 0);
 				fclose(fp); return false;
@@ -245,7 +252,7 @@ namespace BCMFileIO {
 
 			vector<LBCellIDHeader> chs(wnp);
 			for(int i = 0; i < wnp; i++){
-				if( !Load_LeafBlock_CellIDHeader(fp, chs[i], isNeedSwap) ){
+				if( !LoadCellIDHeader(fp, chs[i], isNeedSwap) ){
 					// ファイルロードエラーを全プロセスに通知
 					unsigned char loadError = 1; comm.Bcast(&loadError, 1, MPI::CHAR, 0);
 					fclose(fp); return false;
@@ -256,7 +263,7 @@ namespace BCMFileIO {
 
 			for(int i = 0; i < wnp; i++){
 				contents[i] = NULL;
-				Load_LeafBlock_CellIDData( fp, &contents[i], hdr, chs[i], isNeedSwap );
+				LoadCellIDData( fp, &contents[i], hdr, chs[i], isNeedSwap );
 			}
 
 			fclose(fp);
@@ -348,7 +355,7 @@ namespace BCMFileIO {
 	}
 
 	// CellIDCapsuleのdataはここで解放されます
-	unsigned char* DecompCellIDData( const LBHeader &header,  const CellIDCapsule& cc)
+	unsigned char* LeafBlockLoader::DecompCellIDData( const LBHeader &header,  const CellIDCapsule& cc)
 	{
 		unsigned char* ret = NULL;
 
@@ -357,15 +364,15 @@ namespace BCMFileIO {
 
 		bitVoxelCell* bitVoxel = NULL;
 		if( cc.header.compSize != 0){
-			size_t bitVoxelSize = GetBitVoxelSize(dataSize, header.bitWidth);
+			size_t bitVoxelSize = BitVoxel::GetSize(dataSize, header.bitWidth);
 			size_t dsize = bitVoxelSize * sizeof(bitVoxelCell);
-			bitVoxel = rleDecode<bitVoxelCell, unsigned char>(cc.data, cc.header.compSize, dsize);
+			bitVoxel = BCMRLE::Decode<bitVoxelCell, unsigned char>(cc.data, cc.header.compSize, dsize);
 			delete [] cc.data;
 		}else{
 			bitVoxel = reinterpret_cast<bitVoxelCell*>(cc.data);
 		}
 
-		ret = DecompressBitVoxel(dataSize, bitVoxel, header.bitWidth);
+		ret = BitVoxel::Decompress(dataSize, bitVoxel, header.bitWidth);
 
 		delete [] bitVoxel;
 
@@ -374,7 +381,7 @@ namespace BCMFileIO {
 
 	////////////////////////////////////////////////////////////////////////
 	
-	unsigned char* Load_BlockContents(FILE *fp, const LBHeader& hdr, const Vec3i& bsz, const int vc, const bool isNeedSwap)
+	unsigned char* LeafBlockLoader::Load_BlockContents(FILE *fp, const LBHeader& hdr, const Vec3i& bsz, const int vc, const bool isNeedSwap)
 	{
 		const static size_t typeByteTable[10] = { 1, 1, 2, 2, 4, 4, 8, 8, 4, 8 };
 		static void (*BSwap[10])(void*) = { DUMMY, DUMMY, BSwap16, BSwap16, BSwap32, BSwap32, BSwap64, BSwap64, BSwap32, BSwap64 };
@@ -421,13 +428,12 @@ namespace BCMFileIO {
 		return block;
 	}
 
-	
-	bool Load_LeafBlock_Data(const MPI::Intracomm& comm,
-							 const IdxBlock*       ib,
-							 BlockManager&         blockManager,
-							 PartitionMapper*      pmapper,
-							 const int             vc,
-							 const unsigned int    step )
+	bool LeafBlockLoader::LoadData(const MPI::Intracomm& comm,
+								   const IdxBlock*       ib,
+								   BlockManager&         blockManager,
+								   PartitionMapper*      pmapper,
+								   const int             vc,
+								   const unsigned int    step )
 	{
 		using namespace std;
 		vector<PartitionMapper::FDIDList> fdidlists;
@@ -451,35 +457,35 @@ namespace BCMFileIO {
 			
 			FILE *fp = NULL;
 			if( (fp = fopen(filepath.c_str(), "rb")) == NULL ) {
-				LogE("Cannnot open file (%s) [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+				Logger::Error("Cannnot open file (%s) [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				return false;
 			}
 			
 			bool isNeedSwap = false;
 			LBHeader hdr;
 
-			if( !Load_LeafBlock_Header(fp, hdr, isNeedSwap) ){
-				LogE("%s is not leafBlock file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
+			if( !LoadHeader(fp, hdr, isNeedSwap) ){
+				Logger::Error("%s is not leafBlock file [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				return false;
 			}
 
 			if(hdr.kind != static_cast<unsigned char>(ib->kind) ){
-				LogE("%s's kind(%d) is not corresponds IndexFile(%d) [%s:%d]\n", filepath.c_str(), hdr.kind, ib->kind, __FILE__, __LINE__);
+				Logger::Error("%s's kind(%d) is not corresponds IndexFile(%d) [%s:%d]\n", filepath.c_str(), hdr.kind, ib->kind, __FILE__, __LINE__);
 				return false;
 			}
 
 			if(hdr.dataType != static_cast<unsigned char>(ib->dataType)){
-				LogE("%s's Type(%d) is not corresponds IndexFile(%d). [%s:%d]\n", filepath.c_str(), hdr.dataType, ib->dataType, __FILE__, __LINE__);
+				Logger::Error("%s's Type(%d) is not corresponds IndexFile(%d). [%s:%d]\n", filepath.c_str(), hdr.dataType, ib->dataType, __FILE__, __LINE__);
 				return false;
 			}
 
 			if(hdr.vc != ib->vc ){
-				LogE("%s's vc(%d) is not corresponds IndexFile(%d). [%s:%d]\n", filepath.c_str(), hdr.vc, ib->vc, __FILE__, __LINE__);
+				Logger::Error("%s's vc(%d) is not corresponds IndexFile(%d). [%s:%d]\n", filepath.c_str(), hdr.vc, ib->vc, __FILE__, __LINE__);
 				return false;
 			}
 
 			if(hdr.size[0] != bsz.x || hdr.size[1] != bsz.y || hdr.size[2] != bsz.z){
-				LogE("%s's size(%3d, %3d, %3d) is not corresponds IndexFile(%3d, %3d, %3d). [%s:%d]\n",
+				Logger::Error("%s's size(%3d, %3d, %3d) is not corresponds IndexFile(%3d, %3d, %3d). [%s:%d]\n",
 				     filepath.c_str(), hdr.size[0], hdr.size[1], hdr.size[2], bsz.x, bsz.y, bsz.z, __FILE__, __LINE__);
 				return false;
 			}
@@ -518,6 +524,26 @@ namespace BCMFileIO {
 		return true;
 	}
 
+	template<typename T>
+	bool LeafBlockLoader::CopyBufferToScalar3D(BlockManager& blockManager, const int dataClassID, const int blockID, const int vc, const T*  buf)
+	{
+		Vec3i size = blockManager.getSize();
+
+		BlockBase* block = blockManager.getBlock(blockID);
+		Scalar3D<T>* mesh = dynamic_cast< Scalar3D<T>* >(block->getDataClass(dataClassID));
+		T* data      = mesh->getData();
+		Index3DS idx = mesh->getIndex();
+
+		for(int z = -vc; z < size.z + vc; z++){
+			for(int y = -vc; y < size.y + vc; y++){
+				for(int x = -vc; x < size.x + vc; x++){
+					size_t loc = ( (x+vc) + ((y+vc) + (z+vc) * (size.y + (vc*2))) * (size.x + (vc*2)) );
+					data[idx(x, y, z)] = buf[loc];
+				}
+			}
+		}
+		return true;
+	}
 
 } // BCMFileIO
 

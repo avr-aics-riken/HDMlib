@@ -14,3 +14,10 @@ This HDM library provides following functions for Hierarchical Cartesian structu
   - Restart from previous calculated data of the number of different process
   - Restart from previous coarse data with interpolation
   - Staging helper
+
+
+COPYRIGHT
+=========
+
+Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+All rights reserved.

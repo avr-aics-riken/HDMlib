@@ -19,9 +19,14 @@
 #include <string>
 #include <vector>
 
-#include <Vec3.h>
+#include "Vec3.h"
 
 #include "BCMFileCommon.h"
+#include "IdxBlock.h"
+#include "IdxStep.h"
+#include "Pedigree.h"
+
+using namespace Vec3class;
 
 class BlockManager;
 class BCMOctree;
@@ -104,13 +109,13 @@ namespace BCMFileIO {
 		///
 		/// @return 原点座標
 		///
-		Vec3r GetGlobalOrigin() const { return m_globalOrigin; }
+		Vec3d GetGlobalOrigin() const { return m_globalOrigin; }
 
 		/// 領域全体の長さを返す．
 		///
 		/// @return 領域の長さ
 		///
-		Vec3r GetGlobalRegion() const { return m_globalRegion; }
+		Vec3d GetGlobalRegion() const { return m_globalRegion; }
 		
 		/// タイムステップ情報を取得
 		///
@@ -147,7 +152,7 @@ namespace BCMFileIO {
 		/// @return 成功した場合true, 失敗した場合false
 		///
 		bool LoadIndex(const std::string& filename, 
-		               Vec3r& globalOrigin, Vec3r& globalRegion, 
+		               Vec3d& globalOrigin, Vec3d& globalRegion, 
 					   std::string& octreeFilename, Vec3i& blockSize,
 					   std::vector<IdxProc>& idxProcList, std::vector<IdxBlock>& idxBlockList);
 
@@ -186,8 +191,52 @@ namespace BCMFileIO {
 		/// 読み込んだインデックスファイルの内容をstdoutに出力
 		void PrintIdxInformation();
 
-		//// 読み込んだOctreeファイルの内容をstdoutに出力
+		/// 読み込んだOctreeファイルの内容をstdoutに出力
 		void PrintOctreeInformation();
+
+		/// ユニークなタグを取得
+		int GetUniqueTag();
+
+		/// 2つの文字列を比較
+		/// @param[in]  str1       文字列1
+		/// @param[in]  str2       文字列2
+		/// @param[in]  ignorecase true: 大文字、小文字を区別せず比較、false: 大文字、小文字を区別して比較
+		/// @return 負: str1 < str2、ゼロ: str1 == str2、正: str1 > str2
+		inline int CompStr( const std::string& str1, const std::string& str2, bool ignorecase=true );
+
+		/// Vec3d型のデータ読み込み
+		/// @param[in]  tp		テキストパーサ
+		/// @param[in]  label   ラベル
+		/// @param[out] v		Vec3d
+		/// @return == TP_NO_ERROR: 正常終了、!= TP_NO_ERROR: エラー終了
+		int ReadVec3( TextParser* tp, const std::string& label, Vec3d& v);
+
+		/// Vec3i型のデータ読み込み
+		/// @param[in]  tp		テキストパーサ
+		/// @param[in]  label   ラベル
+		/// @param[out] v		Vec3i
+		/// @return == TP_NO_ERROR: 正常終了、!= TP_NO_ERROR: エラー終了
+		int ReadVec3( TextParser* tp, const std::string& label, Vec3i& v);
+
+		/// LB_DATA_TYPEのデータタイプ取得
+		/// @param[in]  typeStr	データタイプ
+		/// @param[out]	retType	LB_DATA_TYPEデータタイプ
+		/// @return true: 正常終了、false: 該当データタイプなし
+		bool GetType(const std::string& typeStr, LB_DATA_TYPE &retType);
+
+		/// Octreeヘッダの取得
+		/// @param[in] 	fp			ファイルポインタ
+		/// @param[out]	header		OctTreeファイルヘッダ
+		/// @param[out]	isNeedSwap	true: BSwap必要、false: BSwap不要
+		/// @return true: 正常終了、false: 読み込みエラー
+		bool LoadOctreeHeader(FILE *fp, OctHeader& header, bool& isNeedSwap);
+
+		/// Octreeファイルより Pedigreeリストを取得する
+		/// @param[in] 	filename	ファイル名
+		/// @param[out]	header		OctTreeファイルヘッダ
+		/// @param[out]	pedigrees	Pedigreeリスト
+		/// @return true: 正常終了、false: ファイル読み込みエラー
+		bool LoadOctreeFile(const std::string& filename, OctHeader& header, std::vector<Pedigree>& pedigrees);
 
 
 	private:
@@ -199,8 +248,8 @@ namespace BCMFileIO {
 		std::vector<IdxBlock> m_idxBlockList;  ///< ブロック情報リスト
 		IdxUnit               m_unit;          ///< 単位系
 
-		Vec3r m_globalOrigin;                  ///< 領域全体の原点座標
-		Vec3r m_globalRegion;                  ///< 領域全体の長さ
+		Vec3d m_globalOrigin;                  ///< 領域全体の原点座標
+		Vec3d m_globalRegion;                  ///< 領域全体の長さ
 
 		BCMOctree *m_octree;                   ///< Octree
 		

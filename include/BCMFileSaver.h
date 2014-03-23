@@ -19,9 +19,13 @@
 #include <string>
 #include <vector>
 
-#include <Vec3.h>
+#include "Vec3.h"
 
 #include "BCMFileCommon.h"
+#include "IdxBlock.h"
+#include "IdxStep.h"
+
+using namespace Vec3class;
 
 class BCMOctree;
 class RootGrid;
@@ -41,7 +45,7 @@ namespace BCMFileIO {
 		/// @param[in] octree 出力Octree
 		/// @param[in] dir ファイル出力先ディレクトリ(省略した場合、カレントディレクトリ)
 		///
-		BCMFileSaver( const Vec3r& globalOrigin, const Vec3r& globalRegion, const BCMOctree* octree, const std::string dir = std::string("") );
+		BCMFileSaver( const Vec3d& globalOrigin, const Vec3d& globalRegion, const BCMOctree* octree, const std::string dir = std::string("") );
 
 		/// デストラクタ
 		~BCMFileSaver();
@@ -163,12 +167,20 @@ namespace BCMFileIO {
 		/// 
 		bool SaveOctree(const std::string& filepath, const BCMOctree* octree);
 	
+		/// CellIDブロックを取得
+		/// 
+		/// @param[in] ib			インデックスブロック
+		/// @param[in] blockManager	BlockManager
+		/// 
+		/// @return CellIDブロックの先頭アドレス
+		/// 
+		unsigned char* GetCellIDBlock(const IdxBlock* ib, BlockManager& blockManager);
 	private:
 		BlockManager&          m_blockManager;   ///< ブロックマネージャ
 		const MPI::Intracomm&  m_comm;           ///< MPIコミュニケータ
 		const BCMOctree*       m_octree;         ///< BCMOctree
-		const Vec3r            m_globalOrigin;   ///< 計算空間の起点座標
-		const Vec3r            m_globalRegion;   ///< 計算空間全体の領域サイズ
+		const Vec3d            m_globalOrigin;   ///< 計算空間の起点座標
+		const Vec3d            m_globalRegion;   ///< 計算空間全体の領域サイズ
 		IdxUnit                m_unit;           ///< 単位系
 		std::string            m_targetDir;      ///< ファイル出力ターゲットディレクトリ名
 		std::vector<IdxBlock>  m_idxBlockList;   ///< 登録されたブロック情報リスト

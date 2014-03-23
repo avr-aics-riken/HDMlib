@@ -36,153 +36,17 @@
 #include "LeafBlockLoader.h"
 #include "FileSystemUtil.h"
 #include "ErrorUtil.h"
+#include "Logger.h"
 
-#include "type.h"
+#include "BCMTypes.h"
 
 #define OCTREE_LOAD_ONLY_MASTER
 
-namespace {
-
-	int GetUniqueTag(){
-		static const int tagBase = 1000;
-		static int       conter = 0;
-
-		return tagBase + conter++;
-	}
-
-	inline 
-	int CompStr( const std::string& str1, const std::string& str2, bool ignorecase=true )
-	{
-		std::string lstr1 = str1;
-		std::string lstr2 = str2;
-		if( ignorecase ){
-			std::transform(lstr1.begin(), lstr1.end(), lstr1.begin(), ::tolower);
-			std::transform(lstr2.begin(), lstr2.end(), lstr2.begin(), ::tolower);
-		}
-
-		return lstr1.compare(lstr2);
-	}
-
-	int ReadVec3( TextParser* tp, const std::string& label, Vec3r& v)
-	{
-		using namespace std;
-
-		if(!tp){ return TP_ERROR; }
-
-		int err = TP_NO_ERROR;
-		string valStr;
-		vector<string> vec_valStr;
-		if( (err = tp->getValue(label, valStr)) != TP_NO_ERROR){ return err; }
-		tp->splitVector(valStr, vec_valStr);
-
-		Vec3r ret_v;
-		ret_v.x = tp->convertDouble(vec_valStr[0], &err);
-		ret_v.y = tp->convertDouble(vec_valStr[1], &err);
-		ret_v.z = tp->convertDouble(vec_valStr[2], &err);
-
-		v = ret_v;
-
-		return TP_NO_ERROR;
-	}
-
-	int ReadVec3( TextParser* tp, const std::string& label, Vec3i& v)
-	{
-		using namespace std;
-
-		if(!tp){ return TP_ERROR; }
-
-		int err = TP_NO_ERROR;
-		string valStr;
-		vector<string> vec_valStr;
-
-		if( (err = tp->getValue(label, valStr)) != TP_NO_ERROR){ return err; }
-		tp->splitVector(valStr, vec_valStr);
-
-		Vec3i ret_v;
-		ret_v.x = tp->convertInt(vec_valStr[0], &err);
-		ret_v.y = tp->convertInt(vec_valStr[1], &err);
-		ret_v.z = tp->convertInt(vec_valStr[2], &err);
-
-		v.x = ret_v.x;
-		v.y = ret_v.y;
-		v.z = ret_v.z;
-
-		return TP_NO_ERROR;
-	}
-
-} // namespace
+using namespace Vec3class;
 
 namespace BCMFileIO {
 
-	bool GetType(const std::string& typeStr, LB_DATA_TYPE &retType){
-		bool status = false;
-		const char *typeList[10] = {
-			"Int8", "UInt8", "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64", "Float32", "Float64"
-		};
-		for(int i = 0; i < 10; i++){
-			if(CompStr(typeStr, typeList[i]) == 0){
-				status = true;
-				retType = (LB_DATA_TYPE)(i);
-				break;
-			}
-		}
-		return status;
-	}
-
-	bool LoadOctreeHeader(FILE *fp, OctHeader& header, bool& isNeedSwap)
-	{
-		isNeedSwap = false;
-		fread(&header, sizeof(header), 1, fp);
-
-		if( header.identifier != OCTREE_FILE_IDENTIFIER ){
-			BSwap32(&header.identifier);
-
-			if( header.identifier != OCTREE_FILE_IDENTIFIER ){
-				return false;
-			}
-
-			isNeedSwap = true;
-			for(int i = 0; i < 3; i++){
-				BSwap64(&header.org[i]);
-				BSwap64(&header.rgn[i]);
-				BSwap32(&header.rootDims[i]);
-			}
-			BSwap32(&header.maxLevel);
-			BSwap64(&header.numLeaf);
-		}
-
-		return true;
-	}
-
-	bool LoadOctreeFile(const std::string& filename, OctHeader& header, std::vector<Pedigree>& pedigrees)
-	{
-		using namespace std;
-		FILE *fp = NULL;
-		if( (fp = fopen(filename.c_str(), "rb")) == NULL ){
-			LogE("open file error(%s) [%s:%d].\n", filename.c_str(), __FILE__, __LINE__);
-			return false;
-		}
-		
-		bool isNeedSwap = false;
-		if( !LoadOctreeHeader(fp, header, isNeedSwap) ){
-			LogE("Load Header error(%s) [%s:%d].\n", filename.c_str(), __FILE__, __LINE__);
-			fclose(fp);
-			return false;
-		}
-
-		pedigrees.resize(header.numLeaf);
-		fread(&pedigrees[0], sizeof(Pedigree), header.numLeaf, fp);
-
-		fclose(fp);
-
-		if( isNeedSwap ){
-			for(vector<Pedigree>::iterator it = pedigrees.begin(); it != pedigrees.end(); ++it){
-				BSwap64(&(*it));
-			}
-		}
-		return true;
-	}
-
+	typedef LeafBlockLoader::CellIDCapsule CellIDCapsule;
 
 	BCMFileLoader::BCMFileLoader(const std::string& idxFilename, BoundaryConditionSetterBase* bcsetter)
 	 : m_blockManager(BlockManager::getInstance()),
@@ -191,17 +55,17 @@ namespace BCMFileIO {
 	   m_pmapper(NULL)
 	{
 		
-		std::string dir = GetDirectory(ConvertPath(idxFilename));
+		std::string dir = FileSystemUtil:: GetDirectory(FileSystemUtil::ConvertPath(idxFilename));
 		
 		std::string octreeFilename;
-		if( reduceError( !LoadIndex(idxFilename, m_globalOrigin, m_globalRegion, octreeFilename, 
+		if( ErrorUtil::reduceError( !LoadIndex(idxFilename, m_globalOrigin, m_globalRegion, octreeFilename, 
 		                            m_leafBlockSize, m_idxProcList, m_idxBlockList ) ) ){
-			LogE("load index file error (%s) [%s:%d].\n", idxFilename.c_str(), __FILE__, __LINE__);
+			Logger::Error("load index file error (%s) [%s:%d].\n", idxFilename.c_str(), __FILE__, __LINE__);
 			return;
 		}
 
-		if( reduceError( !LoadOctree(std::string(dir + octreeFilename), bcsetter) ) ){
-			LogE("load octree file error (%s) [%s:%d].\n", std::string(dir + octreeFilename).c_str(), __FILE__, __LINE__);
+		if( ErrorUtil::reduceError( !LoadOctree(std::string(dir + octreeFilename), bcsetter) ) ){
+			Logger::Error("load octree file error (%s) [%s:%d].\n", std::string(dir + octreeFilename).c_str(), __FILE__, __LINE__);
 			return;
 		}
 	}
@@ -215,41 +79,41 @@ namespace BCMFileIO {
 
 	bool BCMFileLoader::LoadAdditionalIndex(const std::string& filepath)
 	{
-		Vec3r org;
-		Vec3r rgn;
+		Vec3d org;
+		Vec3d rgn;
 		std::string octname;
 		Vec3i blockSize;
 		std::vector<IdxProc>  idxProcList;
 		std::vector<IdxBlock> idxBlockList;
 
-		if( reduceError( !LoadIndex(filepath, org, rgn, octname, blockSize, idxProcList, idxBlockList) ) ){
-			LogE("load index file error (%s) [%s:%d].\n", filepath.c_str(), __FILE__, __LINE__);
+		if( ErrorUtil::reduceError( !LoadIndex(filepath, org, rgn, octname, blockSize, idxProcList, idxBlockList) ) ){
+			Logger::Error("load index file error (%s) [%s:%d].\n", filepath.c_str(), __FILE__, __LINE__);
 			return false;
 		}
 		// Check error
 		if( idxProcList.size() != m_idxProcList.size() ){
-			LogE("Process Info is invalid (%s) [%s:%d].\n", filepath.c_str(), __FILE__, __LINE__);
+			Logger::Error("Process Info is invalid (%s) [%s:%d].\n", filepath.c_str(), __FILE__, __LINE__);
 			return false;
 		}
 		// Check Octree
 		{
-			std::string dir = GetDirectory(ConvertPath(filepath));
+			std::string dir = FileSystemUtil:: GetDirectory(FileSystemUtil::ConvertPath(filepath));
 			std::string octFilepath = dir + octname;
 			FILE *fp = NULL;
 			if( (fp = fopen(octFilepath.c_str(), "rb")) == NULL ){
-				LogE("Octree is invalid (%s) [%s:%d].\n", filepath.c_str(), __FILE__, __LINE__);
+				Logger::Error("Octree is invalid (%s) [%s:%d].\n", filepath.c_str(), __FILE__, __LINE__);
 				return false;
 			}
 			OctHeader hdr;
 			bool isNeedSwap = false;
 			if( !LoadOctreeHeader(fp, hdr, isNeedSwap) ){
-				LogE("Octree is invalid (%s) [%s:%d].\n", filepath.c_str(), __FILE__, __LINE__);
+				Logger::Error("Octree is invalid (%s) [%s:%d].\n", filepath.c_str(), __FILE__, __LINE__);
 				fclose(fp);
 				return false;
 			}
 			fclose(fp);
 			if( hdr.numLeaf != m_octree->getNumLeafNode() ){
-				LogE("Octree is invalid (%s) [%s:%d].\n", filepath.c_str(), __FILE__, __LINE__);
+				Logger::Error("Octree is invalid (%s) [%s:%d].\n", filepath.c_str(), __FILE__, __LINE__);
 				return false;
 			}
 		}
@@ -262,14 +126,14 @@ namespace BCMFileIO {
 		return true;
 	}
 
-	bool BCMFileLoader::LoadIndex(const std::string& filename, Vec3r& globalOrigin, Vec3r& globalRegion, std::string& octreeFilename,
+	bool BCMFileLoader::LoadIndex(const std::string& filename, Vec3d& globalOrigin, Vec3d& globalRegion, std::string& octreeFilename,
 	                              Vec3i& blockSize, std::vector<IdxProc>& idxProcList, std::vector<IdxBlock>& idxBlockList)
 	{
 		using namespace std;
 		TextParser *tp = new TextParser;
 
 		if( tp->read(filename) != TP_NO_ERROR ) { 
-			LogE("[%s:%d]\n", __FILE__, __LINE__); 
+			Logger::Error("[%s:%d]\n", __FILE__, __LINE__); 
 			delete tp;
 			return false;
 		}
@@ -277,7 +141,7 @@ namespace BCMFileIO {
 		tp->changeNode("/BCMTree");
 		// Read Octree Filename
 		if( tp->getValue("TreeFile", octreeFilename) != TP_NO_ERROR ){
-			LogE("[%s:%d]\n", __FILE__, __LINE__);
+			Logger::Error("[%s:%d]\n", __FILE__, __LINE__);
 			delete tp;
 			return false;
 		}
@@ -285,15 +149,15 @@ namespace BCMFileIO {
 		// Read Proc Filename
 		string procFilename;
 		if( tp->getValue("ProcFile", procFilename) != TP_NO_ERROR ){
-			LogE("[%s:%d]\n", __FILE__, __LINE__); 
+			Logger::Error("[%s:%d]\n", __FILE__, __LINE__); 
 			delete tp;
 			return false;
 		}
 
-		string dir = GetDirectory(ConvertPath(filename));
+		string dir = FileSystemUtil::GetDirectory(FileSystemUtil::ConvertPath(filename));
 		string procFilepath = dir + procFilename;
 		if( !LoadIndexProc(procFilepath, idxProcList) ){
-			LogE("[%s:%d]\n", __FILE__, __LINE__);
+			Logger::Error("[%s:%d]\n", __FILE__, __LINE__);
 			delete tp;
 			return false;
 		}
@@ -319,7 +183,7 @@ namespace BCMFileIO {
 				}
 			}
 			if( !hasOrigin || !hasRegion ){
-				LogE("[%s:%d]\n", __FILE__, __LINE__);
+				Logger::Error("[%s:%d]\n", __FILE__, __LINE__);
 				delete tp;
 				return false;
 			}
@@ -335,7 +199,7 @@ namespace BCMFileIO {
 					tp->changeNode(*nit);
 					IdxBlock ib;
 					if( LoadIndexData(tp, &ib) ){
-						ib.rootDir = FixDirectoryPath(dir);
+						ib.rootDir = FileSystemUtil::FixDirectoryPath(dir);
 						idxBlockList.push_back(ib);
 					}
 					tp->changeNode("../");
@@ -346,7 +210,7 @@ namespace BCMFileIO {
 					tp->changeNode(*nit);
 					IdxBlock ib;
 					if( LoadIndexCellID(tp, &ib) ){
-						ib.rootDir = FixDirectoryPath(dir);
+						ib.rootDir = FileSystemUtil::FixDirectoryPath(dir);
 						idxBlockList.push_back(ib);
 					}
 					tp->changeNode("../");
@@ -371,13 +235,13 @@ namespace BCMFileIO {
 			}
 
 			if( idxBlockList.size() == 0 ){
-				LogE("[%s:%d]\n", __FILE__, __LINE__);
+				Logger::Error("[%s:%d]\n", __FILE__, __LINE__);
 				delete tp;
 				return false;
 			}
 
 			if( ReadVec3(tp, "size", blockSize) != TP_NO_ERROR ){
-				LogE("[%s:%d]\n", __FILE__, __LINE__);
+				Logger::Error("[%s:%d]\n", __FILE__, __LINE__);
 				delete tp;
 				return false;
 			}
@@ -392,7 +256,7 @@ namespace BCMFileIO {
 		TextParser *tp = new TextParser;
 
 		if( tp->read(filepath) != TP_NO_ERROR ) {
-			LogE("[%s:%d]\n", __FILE__, __LINE__);
+			Logger::Error("[%s:%d]\n", __FILE__, __LINE__);
 			delete tp;
 			return false;
 		}
@@ -402,7 +266,7 @@ namespace BCMFileIO {
 			tp->changeNode("/MPI");
 			string valStr;
 			if( tp->getValue("NumberOfRank", valStr) != TP_NO_ERROR ){
-				LogE("[%s:%d]\n", __FILE__, __LINE__);
+				Logger::Error("[%s:%d]\n", __FILE__, __LINE__);
 				delete tp;
 				return false;
 			}
@@ -447,7 +311,7 @@ namespace BCMFileIO {
 		}
 		
 		if(procList.size() != numProcs){
-			LogE("[%s:%d]\n", __FILE__, __LINE__);
+			Logger::Error("[%s:%d]\n", __FILE__, __LINE__);
 			delete tp;
 			procList.clear();
 			return false;
@@ -532,7 +396,7 @@ namespace BCMFileIO {
 
 			if( CompStr(*it, "type") == 0 ){
 				if( !GetType(valStr, ib->dataType) ){
-					LogE("value (%s) of keyword [type] is invalid", valStr.c_str());
+					Logger::Error("value (%s) of keyword [type] is invalid", valStr.c_str());
 					return false;
 				}
 				hasType = true;
@@ -542,7 +406,7 @@ namespace BCMFileIO {
 			if( CompStr(*it, "NumberOfComponents") == 0 ){
 				int val = atoi(valStr.c_str());
 				if( val != 1 && val != 3 && val != 4 && val != 6 && val != 9){
-					LogE("value (%d) of keyword [NumberOfComponents] is invalid", val);
+					Logger::Error("value (%d) of keyword [NumberOfComponents] is invalid", val);
 					return false;
 				}
 				ib->kind = static_cast<LB_KIND>(val);
@@ -569,7 +433,7 @@ namespace BCMFileIO {
 			}
 
 			if( CompStr(*it, "DirectoryPath") == 0){
-				ib->dataDir = FixDirectoryPath(valStr);
+				ib->dataDir = FileSystemUtil::FixDirectoryPath(valStr);
 				continue;
 			}
 
@@ -583,7 +447,7 @@ namespace BCMFileIO {
 		}
 
 		if( !hasName || !hasType || !hasNumComponents || !hasVC || !hasPrefix || !hasExtension ){
-			LogE("Load Index File Error [%d:%s].\n", __FILE__, __LINE__);
+			Logger::Error("Load Index File Error [%d:%s].\n", __FILE__, __LINE__);
 			return false;
 		}
 
@@ -652,7 +516,7 @@ namespace BCMFileIO {
 			}
 
 			if( CompStr(*it, "DirectoryPath") == 0){
-				ib->dataDir = FixDirectoryPath(valStr);
+				ib->dataDir = FileSystemUtil::FixDirectoryPath(valStr);
 				continue;
 			}
 
@@ -664,7 +528,7 @@ namespace BCMFileIO {
 					ib->isGather  = true;
 					hasGatherMode = true;
 				}else{
-					LogE("value (%s) of keyword [GatherMode] is invalid.\n", valStr.c_str());
+					Logger::Error("value (%s) of keyword [GatherMode] is invalid.\n", valStr.c_str());
 					return false;
 				}
 				continue;
@@ -672,7 +536,7 @@ namespace BCMFileIO {
 		}
 
 		if(!hasName || !hasBitWidth || !hasPrefix || !hasExtension || !hasGatherMode ){
-			LogE("Load Index File Error [%d:%s].\n", __FILE__, __LINE__);
+			Logger::Error("Load Index File Error [%d:%s].\n", __FILE__, __LINE__);
 			return false;
 		}
 
@@ -713,17 +577,17 @@ namespace BCMFileIO {
 		}
 		else
 		{
-			if( reduceError( !LoadOctreeFile(filename, header, pedigrees)) ) return false;
+			if( ErrorUtil::reduceError( !LoadOctreeFile(filename, header, pedigrees)) ) return false;
 		}
 		
 
-		Vec3r rootRegion( header.rgn[0] / static_cast<double>(header.rootDims[0]),
+		Vec3d rootRegion( header.rgn[0] / static_cast<double>(header.rootDims[0]),
 		                  header.rgn[1] / static_cast<double>(header.rootDims[1]),
 					  	  header.rgn[2] / static_cast<double>(header.rootDims[2]) );
 
 		if( fabs(rootRegion.x - rootRegion.y) >= 1.0e-10 || fabs(rootRegion.x - rootRegion.z) >= 1.0e-10 ) {
-			LogE("%lf %lf %lf\n", rootRegion.x, rootRegion.y, rootRegion.z);
-			LogE("RootGrid is not regular hexahedron. [%s:%d]\n", __FILE__, __LINE__);
+			Logger::Error("%lf %lf %lf\n", rootRegion.x, rootRegion.y, rootRegion.z);
+			Logger::Error("RootGrid is not regular hexahedron. [%s:%d]\n", __FILE__, __LINE__);
 			return false;
 		}
 		
@@ -733,7 +597,7 @@ namespace BCMFileIO {
 		
 		// Make and register Block
 		Partition part(numProcs, header.numLeaf);
-		BlockFactory factory(m_octree, &part, bcsetter, Vec3r(header.org), rootRegion.x, m_leafBlockSize);
+		BlockFactory factory(m_octree, &part, bcsetter, Vec3d(header.org), rootRegion.x, m_leafBlockSize);
 
 		vector<Node*>& leafNodeArray = m_octree->getLeafNodeArray();
 		for(int id = part.getStart(myRank); id < part.getEnd(myRank); id++){
@@ -744,8 +608,8 @@ namespace BCMFileIO {
 
 		m_blockManager.endRegisterBlock();
 
-		m_globalOrigin = Vec3r(header.org);
-		m_globalRegion = Vec3r(header.rgn);
+		m_globalOrigin = Vec3d(header.org);
+		m_globalRegion = Vec3d(header.rgn);
 
 		return true;
 	}
@@ -755,13 +619,13 @@ namespace BCMFileIO {
 		using namespace std;
 		bool err = false;
 
-		IdxBlock* ib = findIdxBlock(m_idxBlockList, name);
+		IdxBlock* ib = IdxBlock::find(m_idxBlockList, name);
 
 		if( ib == NULL ){
-			LogE("No such name as \"%s\" in loaded index.[%s:%d]\n", name.c_str(), __FILE__, __LINE__);
+			Logger::Error("No such name as \"%s\" in loaded index.[%s:%d]\n", name.c_str(), __FILE__, __LINE__);
 			err = true;
 		}
-		if( reduceError(err) ) { return false; }
+		if( ErrorUtil::reduceError(err) ) { return false; }
 
 		if(ib->kind == LB_CELLID)
 		{
@@ -820,7 +684,7 @@ namespace BCMFileIO {
 				//else if( ib->dataType == LB_INT64  ) { dataClassID = m_blockManager.setDataClass< Scalar3D<s64>, Scalar3DUpdater<s64> >(vc); }
 				//else if( ib->dataType == LB_UINT64 ) { dataClassID = m_blockManager.setDataClass< Scalar3D<u64>, Scalar3DUpdater<u64> >(vc); }
 				else{
-					LogE("invalid DataType (%d)[%s:%d]\n", ib->dataType, __FILE__, __LINE__);
+					Logger::Error("invalid DataType (%d)[%s:%d]\n", ib->dataType, __FILE__, __LINE__);
 					err = true;
 				}
 				m_blockManager.prepareForVCUpdate(dataClassID, GetUniqueTag(), separateVCUpdate);
@@ -830,7 +694,7 @@ namespace BCMFileIO {
 			ib->dataClassID = dataClassID;
 		}
 */
-		if( reduceError(err) ){ return false; }
+		if( ErrorUtil::reduceError(err) ){ return false; }
 
 		return true;
 	}
@@ -845,15 +709,15 @@ namespace BCMFileIO {
 
 		bool err = false;
 
-		IdxBlock* ib = findIdxBlock(m_idxBlockList, name);
+		IdxBlock* ib = IdxBlock::find(m_idxBlockList, name);
 		
 		if( ib == NULL ){
-			LogE("No such name as \"%s\" in loaded index.[%s:%d]\n", name.c_str(), __FILE__, __LINE__);
+			Logger::Error("No such name as \"%s\" in loaded index.[%s:%d]\n", name.c_str(), __FILE__, __LINE__);
 			err = true;
 		}
-		if( reduceError(err) ){ return false; }
+		if( ErrorUtil::reduceError(err) ){ return false; }
 
-		if( reduceError( !CreateLeafBlock(dataClassID, name, vc, separateVCUpdate) ) ){ return false; }
+		if( ErrorUtil::reduceError( !CreateLeafBlock(dataClassID, name, vc, separateVCUpdate) ) ){ return false; }
 
 		// CellIDデータロード
 		if(ib->kind == LB_CELLID)
@@ -863,13 +727,13 @@ namespace BCMFileIO {
 
 			if( ib->isGather ){
 				// ファイルからCellIDを読み込む (GatherMode = Gathered)
-				err = !Load_LeafBlock_CellID_Gather(ib->rootDir + ib->dataDir, ib, m_comm, m_pmapper, header, cidCapsules);
+				err = !LeafBlockLoader::LoadCellID_Gather(ib->rootDir + ib->dataDir, ib, m_comm, m_pmapper, header, cidCapsules);
 			}else{
 				// ファイルからCellIDを読み込む (GatherMode = Distributed)
-				err = !Load_LeafBlock_CellID(ib->rootDir + ib->dataDir, ib, m_comm, m_pmapper, header, cidCapsules);
+				err = !LeafBlockLoader::LoadCellID(ib->rootDir + ib->dataDir, ib, m_comm, m_pmapper, header, cidCapsules);
 			}
 			// エラーチェック
-			if( reduceError(err) ){
+			if( ErrorUtil::reduceError(err) ){
 				for(vector<CellIDCapsule>::iterator it = cidCapsules.begin(); it != cidCapsules.end(); ++it){
 					delete [] it->data;
 				}
@@ -887,7 +751,7 @@ namespace BCMFileIO {
 			for(vector<PartitionMapper::FDIDList>::iterator file = fdidlists.begin(); file != fdidlists.end(); ++file){
 
 				// rleおよびbitVoxelの圧縮を展開
-				unsigned char* voxels = DecompCellIDData( header, cidCapsules[fid] );
+				unsigned char* voxels = LeafBlockLoader::DecompCellIDData( header, cidCapsules[fid] );
 				
 				// 展開したvoxelsからブロックごとにデータをコピー
 				for( vector<int>::iterator fdid = file->FDIDs.begin(); fdid != file->FDIDs.end(); ++fdid){
@@ -918,7 +782,7 @@ namespace BCMFileIO {
 						}
 					}
 					// ブロックマネージャ配下のブロックに値をコピー
-					CopyBufferToScalar3D(m_blockManager, dataClassID[0], did, vc, block);
+					LeafBlockLoader::CopyBufferToScalar3D(m_blockManager, dataClassID[0], did, vc, block);
 					did++;
 					delete [] block;
 				}
@@ -930,7 +794,7 @@ namespace BCMFileIO {
 		else
 		{
 			// ファイルからデータを読み込み、ブロックマネージャ配下のブロックに値をコピー
-			if( reduceError(!Load_LeafBlock_Data( m_comm, ib, m_blockManager, m_pmapper, vc, step)) ){
+			if( ErrorUtil::reduceError(!LeafBlockLoader::LoadData( m_comm, ib, m_blockManager, m_pmapper, vc, step)) ){
 				return false;
 			}
 			// 現在の仮想セルサイズがファイルに記載されている仮想セルサイズよりも大きい場合、仮想セルの同期を行う
@@ -953,11 +817,146 @@ namespace BCMFileIO {
 
 	const IdxStep* BCMFileLoader::GetStep(const std::string& name ) const
 	{
-		const IdxBlock* ib = findIdxBlock(m_idxBlockList, name);
+		const IdxBlock* ib = IdxBlock::find(m_idxBlockList, name);
 
 		if( ib == NULL ) return NULL;
 
 		return &(ib->step);
+	}
+
+	int BCMFileLoader::GetUniqueTag(){
+		static const int tagBase = 1000;
+		static int       conter = 0;
+
+		return tagBase + conter++;
+	}
+
+	inline int BCMFileLoader::CompStr( const std::string& str1, const std::string& str2, bool ignorecase )
+	{
+		std::string lstr1 = str1;
+		std::string lstr2 = str2;
+		if( ignorecase ){
+			std::transform(lstr1.begin(), lstr1.end(), lstr1.begin(), ::tolower);
+			std::transform(lstr2.begin(), lstr2.end(), lstr2.begin(), ::tolower);
+		}
+
+		return lstr1.compare(lstr2);
+	}
+
+	int BCMFileLoader::ReadVec3( TextParser* tp, const std::string& label, Vec3d& v)
+	{
+		using namespace std;
+
+		if(!tp){ return TP_ERROR; }
+
+		int err = TP_NO_ERROR;
+		string valStr;
+		vector<string> vec_valStr;
+		if( (err = tp->getValue(label, valStr)) != TP_NO_ERROR){ return err; }
+		tp->splitVector(valStr, vec_valStr);
+
+		Vec3d ret_v;
+		ret_v.x = tp->convertDouble(vec_valStr[0], &err);
+		ret_v.y = tp->convertDouble(vec_valStr[1], &err);
+		ret_v.z = tp->convertDouble(vec_valStr[2], &err);
+
+		v = ret_v;
+
+		return TP_NO_ERROR;
+	}
+
+	int BCMFileLoader::ReadVec3( TextParser* tp, const std::string& label, Vec3i& v)
+	{
+		using namespace std;
+
+		if(!tp){ return TP_ERROR; }
+
+		int err = TP_NO_ERROR;
+		string valStr;
+		vector<string> vec_valStr;
+
+		if( (err = tp->getValue(label, valStr)) != TP_NO_ERROR){ return err; }
+		tp->splitVector(valStr, vec_valStr);
+
+		Vec3i ret_v;
+		ret_v.x = tp->convertInt(vec_valStr[0], &err);
+		ret_v.y = tp->convertInt(vec_valStr[1], &err);
+		ret_v.z = tp->convertInt(vec_valStr[2], &err);
+
+		v.x = ret_v.x;
+		v.y = ret_v.y;
+		v.z = ret_v.z;
+
+		return TP_NO_ERROR;
+	}
+
+	bool BCMFileLoader::GetType(const std::string& typeStr, LB_DATA_TYPE &retType){
+		bool status = false;
+		const char *typeList[10] = {
+			"Int8", "UInt8", "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64", "Float32", "Float64"
+		};
+		for(int i = 0; i < 10; i++){
+			if(CompStr(typeStr, typeList[i]) == 0){
+				status = true;
+				retType = (LB_DATA_TYPE)(i);
+				break;
+			}
+		}
+		return status;
+	}
+
+	bool BCMFileLoader::LoadOctreeHeader(FILE *fp, OctHeader& header, bool& isNeedSwap)
+	{
+		isNeedSwap = false;
+		fread(&header, sizeof(header), 1, fp);
+
+		if( header.identifier != OCTREE_FILE_IDENTIFIER ){
+			BSwap32(&header.identifier);
+
+			if( header.identifier != OCTREE_FILE_IDENTIFIER ){
+				return false;
+			}
+
+			isNeedSwap = true;
+			for(int i = 0; i < 3; i++){
+				BSwap64(&header.org[i]);
+				BSwap64(&header.rgn[i]);
+				BSwap32(&header.rootDims[i]);
+			}
+			BSwap32(&header.maxLevel);
+			BSwap64(&header.numLeaf);
+		}
+
+		return true;
+	}
+
+	bool BCMFileLoader::LoadOctreeFile(const std::string& filename, OctHeader& header, std::vector<Pedigree>& pedigrees)
+	{
+		using namespace std;
+		FILE *fp = NULL;
+		if( (fp = fopen(filename.c_str(), "rb")) == NULL ){
+			Logger::Error("open file error(%s) [%s:%d].\n", filename.c_str(), __FILE__, __LINE__);
+			return false;
+		}
+		
+		bool isNeedSwap = false;
+		if( !LoadOctreeHeader(fp, header, isNeedSwap) ){
+			Logger::Error("Load Header error(%s) [%s:%d].\n", filename.c_str(), __FILE__, __LINE__);
+			fclose(fp);
+			return false;
+		}
+
+		pedigrees.resize(header.numLeaf);
+		fread(&pedigrees[0], sizeof(Pedigree), header.numLeaf, fp);
+
+		fclose(fp);
+
+		if( isNeedSwap ){
+			for(vector<Pedigree>::iterator it = pedigrees.begin(); it != pedigrees.end(); ++it){
+				BSwap64(&(*it));
+			}
+		}
+		return true;
 	}
 
 } // BCMFileIO

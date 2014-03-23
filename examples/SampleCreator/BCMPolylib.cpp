@@ -42,7 +42,8 @@ POLYLIB_STAT BCMPolylib::load(std::string config_filename)
   }
 
   // グループ階層構造構築。
-  if ((ret = Polylib::make_group_tree(m_config_contents)) != PLSTAT_OK ) {
+//  if ((ret = Polylib::make_group_tree(m_config_contents)) != PLSTAT_OK ) {
+  if ((ret = Polylib::make_group_tree(config_filename)) != PLSTAT_OK ) {
     PL_ERROSH << "[ERROR]MPIPolylib::load_rank0():Polylib::make_group_tree() faild. returns:"
               << PolylibStat2::String(ret) << std::endl;
     return ret;

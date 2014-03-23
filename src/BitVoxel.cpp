@@ -11,19 +11,29 @@
 /// @brief ビットボクセル圧縮/展開ライブラリ
 ///
 
-#include "BitVoxel.h"
 #include <cstring>
+
+#include "BitVoxel.h"
 
 namespace BCMFileIO
 {
-	size_t GetBitVoxelSize(const size_t voxelSize, const unsigned char bitWidth)
+	typedef unsigned int bitVoxelCell;
+
+	BitVoxel::BitVoxel()
+	{
+	}
+
+	BitVoxel::~BitVoxel()
+	{
+	}
+
+	size_t BitVoxel::GetSize(const size_t voxelSize, const unsigned char bitWidth)
 	{
 		const unsigned char vox_per_cell = (sizeof(bitVoxelCell) * 8) / bitWidth;
 		return (voxelSize / vox_per_cell + (voxelSize % vox_per_cell == 0 ? 0 : 1 ));
 	}
 
-
-	bitVoxelCell* CompressBitVoxel( size_t* bitVoxelSize, const size_t voxelSize, const unsigned char* voxel, const unsigned char  bitWidth)
+	bitVoxelCell* BitVoxel::Compress( size_t* bitVoxelSize, const size_t voxelSize, const unsigned char* voxel, const unsigned char  bitWidth)
 	{
 		const unsigned char vox_per_cell = (sizeof(bitVoxelCell) * 8) / bitWidth;
 		size_t bsz  = voxelSize / vox_per_cell + (voxelSize % vox_per_cell == 0 ? 0 : 1);
@@ -47,9 +57,8 @@ namespace BCMFileIO
 		return bitVoxel;
 
 	}
-	
 
-	unsigned char* DecompressBitVoxel( const size_t voxelSize, const bitVoxelCell* bitVoxel, const unsigned char  bitWidth)
+	unsigned char* BitVoxel::Decompress( const size_t voxelSize, const bitVoxelCell* bitVoxel, const unsigned char  bitWidth)
 	{
 		const unsigned char vox_per_cell = (sizeof(bitVoxelCell) * 8) / bitWidth;
 

@@ -13,13 +13,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.57])
-AC_INIT([HDMlib], [0.1.0], [keno@riken.jp],[HDMlib])
+AC_INIT([HDMlib], [0.4.0], [keno@riken.jp],[HDMlib])
 AM_INIT_AUTOMAKE()
 AC_CONFIG_SRCDIR([src/ErrorUtil.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 # revision No.
-HDM_REVISION="20140125_1730"
+HDM_REVISION="20140323_1630"
 AC_SUBST(HDM_REVISION)
 
 #
@@ -173,7 +173,7 @@ AC_CHECK_HEADERS([limits.h stdint.h string.h unistd.h])
 
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
+#AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_INT16_T
 AC_TYPE_INT32_T
@@ -194,7 +194,7 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  doc/Makefile
                  hdm-config
-                 include/hdm_Version.h])
+                 include/hdmVersion.h])
 AC_OUTPUT
 
 
