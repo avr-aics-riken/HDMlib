@@ -19,6 +19,7 @@
 
 namespace BCMFileIO {
 
+	/// ビットボクセル圧縮/展開ライブラリ
 	class BitVoxel {
 	public:
 

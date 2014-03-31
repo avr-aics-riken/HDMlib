@@ -19,6 +19,7 @@
 
 namespace BCMFileIO {
 
+	/// ディレクトリ操作ユーティリティ
 	class DirUtil {
 	public:
 

@@ -16,6 +16,7 @@
 
 namespace BCMFileIO {
 
+	/// ログ出力ユーティリティ
 	class Logger {
 	private:
 

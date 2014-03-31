@@ -26,6 +26,7 @@ class BlockManager;
 
 namespace BCMFileIO {
 	
+	/// LeafBlockファイルを出力する関数群
 	class LeafBlockSaver {
 	public:
 

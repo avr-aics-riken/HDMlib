@@ -22,6 +22,7 @@
 
 namespace BCMFileIO {
 
+	/// MxNデータロードのためのマッピングクラス
 	class PartitionMapper
 	{
 	public:

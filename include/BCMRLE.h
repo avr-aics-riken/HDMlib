@@ -16,6 +16,7 @@
 
 namespace BCMFileIO {
 
+	/// ランレングスによる圧縮/展開ライブラリ
 	class BCMRLE {
 	public:
 		/// RLE圧縮

@@ -28,6 +28,7 @@
 
 namespace BCMFileIO {
 
+	/// ファイル操作関連ユーティリティ
 	class FileSystemUtil {
 	public:
 
