@@ -1,0 +1,28 @@
+#! /bin/bash
+
+if [ -e ./latex ]; then
+	rm -r ./latex
+fi
+
+~/doxygen dox_HDMlib.conf
+#doxygen Doxyfile
+
+cd latex
+mkdir euc
+cp -ip * euc
+
+files="./*.tex"
+
+for filepath in ${files}
+do
+	nkf -e ${filepath} > ./euc/${filepath}
+done
+
+cd ./euc
+
+platex refman
+jbibtex refman
+platex refman
+platex refman
+dvipdfmx refman
+mv refman.pdf ../../reference.pdf

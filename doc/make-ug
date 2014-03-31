@@ -1,0 +1,12 @@
+#! /bin/bash
+
+nkf -e hdmlib_ug.tex > hdmlib_ug_e.tex
+
+platex hdmlib_ug_e
+jbibtex hdmlib_ug_e
+platex hdmlib_ug_e
+platex hdmlib_ug_e
+dvipdfmx hdmlib_ug_e
+mv hdmlib_ug_e.pdf hdmlib_ug.pdf 
+
+rm hdmlib_ug_e.*
