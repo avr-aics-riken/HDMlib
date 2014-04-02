@@ -38,7 +38,7 @@ namespace BCMFileIO {
 
 	class PartitionMapper;
 
-	// BCMファイルを読み込むクラス
+	/// BCMファイルを読み込むクラス
 	class BCMFileLoader
 	{
 	public:

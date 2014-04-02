@@ -27,6 +27,7 @@ using namespace Vec3class;
 
 namespace BCMFileIO {
 
+	/// LeafBlockファイルを読み込むクラス
 	class LeafBlockLoader {
 	public:
 

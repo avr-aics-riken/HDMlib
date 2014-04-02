@@ -18,6 +18,7 @@
 
 namespace BCMFileIO {
 
+	/// エラー処理関連のユーティリティ
 	class ErrorUtil {
 	public:
 
