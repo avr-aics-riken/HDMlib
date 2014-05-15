@@ -18,7 +18,7 @@
 
 /**
  * @file   Vec3.h
- * @brief  version 1.0 2014-03-23
+ * @brief  version 1.1 2014-04-23
  * @author aics
  */
 
@@ -35,6 +35,18 @@
 //#include <stdexcept>
 
 namespace Vec3class {
+  
+// precision
+#ifdef _REAL_IS_DOUBLE_
+#define REAL_TYPE double
+#else
+  /** 実数型の指定
+   * - デフォルトでは、REAL_TYPE=float
+   * - コンパイル時オプション-D_REAL_IS_DOUBLE_を付与することで
+   *   REAL_TYPE=doubleになる
+   */
+#define REAL_TYPE float
+#endif
   
 typedef enum {
 	AXIS_X = 0,
@@ -56,7 +68,7 @@ public:
 	Vec3(T v = 0)			      { x = y = z = v; }
 	Vec3(T _x, T _y, T _z)	{ x=_x;  y=_y;  z=_z; }
 	Vec3(const T v[3])		  { x = v[0];  y = v[1];  z = v[2]; }
-	Vec3(const Vec3& v) : x(v.x), y(v.y), z(v.z) {}
+  Vec3(const Vec3& v) : x(v.x), y(v.y), z(v.z) {}
 
 	Vec3<T>& assign(T _x, T _y, T _z) { 
 		x=_x; y=_y; z=_z; 
@@ -71,7 +83,7 @@ public:
 
 
 	T& operator [](const AxisEnum& axis) {
-	   return (&x)[axis];
+    return (&x)[axis];
     /*
     switch (axis) {
       case 0: return x;
@@ -81,7 +93,7 @@ public:
     }*/
 	}
 	const T& operator [](const AxisEnum& axis) const {
-	  return (&x)[axis];
+    return (&x)[axis];
     /*
     switch (axis) {
       case 0: return x;
@@ -197,6 +209,7 @@ typedef Vec3<unsigned char> Vec3uc;
 typedef Vec3<int>           Vec3i;
 typedef Vec3<float>         Vec3f;
 typedef Vec3<double>        Vec3d;
+typedef Vec3<REAL_TYPE>     Vec3r;
 
 //=========================================================================
 // inline

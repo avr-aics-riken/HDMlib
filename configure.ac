@@ -13,13 +13,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.57])
-AC_INIT([HDMlib], [0.5.0], [keno@riken.jp],[HDMlib])
+AC_INIT([HDMlib], [0.5.1], [keno@riken.jp],[HDMlib])
 AM_INIT_AUTOMAKE()
 AC_CONFIG_SRCDIR([src/ErrorUtil.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 # revision No.
-HDM_REVISION="20140402_1130"
+HDM_REVISION="20140515_1100"
 AC_SUBST(HDM_REVISION)
 
 #
