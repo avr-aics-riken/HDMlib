@@ -782,7 +782,7 @@ namespace BCMFileIO {
 						}
 					}
 					// ブロックマネージャ配下のブロックに値をコピー
-					LeafBlockLoader::CopyBufferToScalar3D(m_blockManager, dataClassID[0], did, vc, block);
+					LeafBlockLoader::CopyBufferToScalar3D(m_blockManager, dataClassID[0], did, vc, static_cast<const unsigned char*>(block));
 					did++;
 					delete [] block;
 				}

@@ -127,7 +127,23 @@ namespace BCMFileIO {
 		/// @return 成功した場合true, 失敗した場合false
 		///
 		template<typename T>
-		static bool CopyBufferToScalar3D(BlockManager& blockManager, const int dataClassID, const int blockID, const int vc, const T*  buf);
+		static bool CopyBufferToScalar3D(BlockManager& blockManager, const int dataClassID, const int blockID, const int vc, const T*  buf)
+		{       
+			Vec3i size = blockManager.getSize();
+							
+			BlockBase* block = blockManager.getBlock(blockID);
+			Scalar3D<T>* mesh = dynamic_cast< Scalar3D<T>* >(block->getDataClass(dataClassID));
+			T* data      = mesh->getData();         
+			Index3DS idx = mesh->getIndex();                
+											
+			for(int z = -vc; z < size.z + vc; z++){                 
+				for(int y = -vc; y < size.y + vc; y++){                             
+					for(int x = -vc; x < size.x + vc; x++){                                             
+						size_t loc = ( (x+vc) + ((y+vc) + (z+vc) * (size.y + (vc*2))) * (size.x + (vc*2)) );
+						data[idx(x, y, z)] = buf[loc];                                                                          
+					}
+				}                                                                                                                               }   
+			return true;                                                                                                                    }  
 
 	private:
 		/// BitVoxelサイズを取得する

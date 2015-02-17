@@ -524,26 +524,5 @@ namespace BCMFileIO {
 		return true;
 	}
 
-	template<typename T>
-	bool LeafBlockLoader::CopyBufferToScalar3D(BlockManager& blockManager, const int dataClassID, const int blockID, const int vc, const T*  buf)
-	{
-		Vec3i size = blockManager.getSize();
-
-		BlockBase* block = blockManager.getBlock(blockID);
-		Scalar3D<T>* mesh = dynamic_cast< Scalar3D<T>* >(block->getDataClass(dataClassID));
-		T* data      = mesh->getData();
-		Index3DS idx = mesh->getIndex();
-
-		for(int z = -vc; z < size.z + vc; z++){
-			for(int y = -vc; y < size.y + vc; y++){
-				for(int x = -vc; x < size.x + vc; x++){
-					size_t loc = ( (x+vc) + ((y+vc) + (z+vc) * (size.y + (vc*2))) * (size.x + (vc*2)) );
-					data[idx(x, y, z)] = buf[loc];
-				}
-			}
-		}
-		return true;
-	}
-
 } // BCMFileIO
 
