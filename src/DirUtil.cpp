@@ -6,10 +6,13 @@
  *
  */
 
+#include "ErrorUtil.h"
 #include "FileSystemUtil.h"
+#include "DirUtil.h"
 
 #include <vector>
 #include <string>
+#include <cstring>
 
 #include <algorithm>
 #include <sys/types.h>
@@ -17,8 +20,6 @@
 #include <unistd.h> 
 #include <dirent.h>
 
-#include "DirUtil.h"
-#include "ErrorUtil.h"
 
 namespace BCMFileIO {
 

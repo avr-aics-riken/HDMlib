@@ -14,6 +14,8 @@
 #ifndef __BCMTOOLS_BCMRLE_H__
 #define __BCMTOOLS_BCMRLE_H__
 
+#include <cstring>
+
 namespace BCMFileIO {
 
 	/// ランレングスによる圧縮/展開ライブラリ

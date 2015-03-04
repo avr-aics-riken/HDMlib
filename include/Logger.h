@@ -14,6 +14,8 @@
 #ifndef __BCMTOOLS_LOGGER_H__
 #define __BCMTOOLS_LOGGER_H__
 
+#include <string>
+
 namespace BCMFileIO {
 
 	class Logger {
