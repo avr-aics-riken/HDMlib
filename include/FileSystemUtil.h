@@ -14,6 +14,9 @@
 #ifndef __BCMTOOLS_FILESYSTEM_UTIL_H__
 #define __BCMTOOLS_FILESYSTEM_UTIL_H__
 
+#include "Logger.h"
+#include "DirUtil.h"
+
 #include <algorithm>
 #include <sys/types.h>
 #include <sys/stat.h> 
@@ -23,8 +26,6 @@
 #include <string>
 #include <vector>
 
-#include "DirUtil.h"
-#include "Logger.h"
 
 namespace BCMFileIO {
 

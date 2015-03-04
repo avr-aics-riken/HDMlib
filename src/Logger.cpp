@@ -11,6 +11,8 @@
 /// @brief ログ出力ユーティリティ
 ///
 
+#include <mpi.h>
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <string>
@@ -19,7 +21,6 @@
 #include <windows.h>
 #endif
 
-#include <mpi.h>
 
 #include "Logger.h"
 

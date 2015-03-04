@@ -31,6 +31,7 @@
 
 #include <vector>
 #include <string>
+#include <cstring>
 
 #include "BCMFileCommon.h"
 #include "LeafBlockLoader.h"

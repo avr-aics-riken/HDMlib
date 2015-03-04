@@ -11,10 +11,12 @@
 /// @brief LeafBlockファイルを読み込むクラス
 ///
 
+#include "LeafBlockLoader.h"
+
 #include <vector>
 #include <string>
+#include <cstring>
 
-#include "LeafBlockLoader.h"
 #include "BitVoxel.h"
 #include "BCMRLE.h"
 #include "ErrorUtil.h"
