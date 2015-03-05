@@ -298,7 +298,7 @@ namespace BCMFileIO {
 			
 			// Rank 0用のデータコピー
 
-			bool freeMask[wnp];
+			bool *freeMask = new bool[wnp];
 			for( int i = 0; i < wnp; i++){ freeMask[i] = true; }
 
 			vector<PartitionMapper::FDIDList> fdidlists;
@@ -315,6 +315,8 @@ namespace BCMFileIO {
 			for(int i = 0; i < wnp; i++){
 				if(freeMask[i]) delete [] contents[i];
 			}
+
+			delete [] freeMask;
 		}
 		// rank 0 以外
 		else
