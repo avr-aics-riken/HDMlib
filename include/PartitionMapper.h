@@ -20,6 +20,8 @@
 
 #include "Partition.h"
 
+#include <algorithm>
+
 namespace BCMFileIO {
 
 	/// MxNデータロードのためのマッピングクラス
@@ -108,8 +110,8 @@ namespace BCMFileIO {
 			}
 	
 			// FIDの重複削除
-			sort(fids.begin(), fids.end());
-			fids.erase( unique(fids.begin(), fids.end()), fids.end());
+			std::sort(fids.begin(), fids.end());
+			fids.erase( std::unique(fids.begin(), fids.end()), fids.end());
 	
 	
 			/// FDIDListのリストを作成

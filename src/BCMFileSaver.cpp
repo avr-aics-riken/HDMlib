@@ -508,9 +508,9 @@ namespace BCMFileIO {
 
 		std::string procName("proc.bcm");
 		std::string procPath = m_targetDir + procName;
-		if( ErrorUtil::reduceError(!SaveIndexProc(procPath, part)) )      { Logger::Error("%s:%s:%d\n", __func__, __FILE__, __LINE__); return false; }
-		if( ErrorUtil::reduceError(!SaveIndexCellID(procName, octName)) ) { Logger::Error("%s:%s:%d\n", __func__, __FILE__, __LINE__); return false; }
-		if( ErrorUtil::reduceError(!SaveIndexData(procName, octName)) )   { Logger::Error("%s:%s:%d\n", __func__, __FILE__, __LINE__); return false; }
+		if( ErrorUtil::reduceError(!SaveIndexProc(procPath, part)) )      { Logger::Error("%s:%d\n", __FILE__, __LINE__); return false; }
+		if( ErrorUtil::reduceError(!SaveIndexCellID(procName, octName)) ) { Logger::Error("%s:%d\n", __FILE__, __LINE__); return false; }
+		if( ErrorUtil::reduceError(!SaveIndexData(procName, octName)) )   { Logger::Error("%s:%d\n", __FILE__, __LINE__); return false; }
 
 		return true;
 	}
