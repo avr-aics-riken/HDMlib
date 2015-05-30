@@ -1,7 +1,7 @@
 /*
  * HDMlib - Hierarchical Data Management library
  *
- * Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+ * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
  * All rights reserved.
  *
  */
@@ -21,6 +21,7 @@ HOW TO COMPILE
 
 1. with configure
 
+$ export FFV_HOME=/hogehoge
 $ ./configure [options]
 $ make
 # make install
@@ -62,7 +63,7 @@ Here is examples.
 ## for the combination of Intel compiler and OpenMPI.
 
   $ ./configure --with-ompi=/opt/openmpi \
-                --with-parser=/usr/local/FFV/TextParser \
+                --with-parser=${FFV_HOME}/TextParser \
                 --with-bcm=/usr/local/BCMTools \
                 CXX=icpc \
                 CXXFLAGS="-O3 -Wall"
@@ -71,7 +72,7 @@ Here is examples.
 
 ## OpenMPI with wrapper compiler, assume that mpicxx is a wrapper compiler for OpenMPI.
 
-  $ ./configure --with-parser=/usr/local/FFV/TextParser \
+  $ ./configure --with-parser=${FFV_HOME}/TextParser \
                 --with-bcm=/usr/local/BCMTools \
                 --prefix=/usr/local/HDMlib CXX=mpicxx CXXFLAGS=-O3
 

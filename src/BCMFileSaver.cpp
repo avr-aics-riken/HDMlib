@@ -1,7 +1,7 @@
 /*
  * HDMlib - Hierarchical Data Management library
  *
- * Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+ * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
  * All rights reserved.
  *
  */
@@ -359,8 +359,12 @@ namespace BCMFileIO {
 
 		// write CellID Information
 		os << "Domain { " << endl;
-		os << "  GlobalOrigin = " << m_globalOrigin << endl;
-		os << "  GlobalRegion = " << m_globalRegion << endl;
+		os << "  GlobalOrigin = " << "( " << m_globalOrigin.x << ", "
+                                      << m_globalOrigin.y << ", "
+                                      << m_globalOrigin.z << " )"  << endl;
+		os << "  GlobalRegion = " << "( " << m_globalRegion.x << ", "
+                                      << m_globalRegion.y << ", "
+                                      << m_globalRegion.z << " )"  << endl;
 		os << "}" << endl;
 		os << endl;
 		os << "BCMTree {" << endl;
@@ -423,8 +427,12 @@ namespace BCMFileIO {
 
 		// write Data Information
 		os << "Domain { " << endl;
-		os << "  GlobalOrigin = " << m_globalOrigin << endl;
-		os << "  GlobalRegion = " << m_globalRegion << endl;
+    os << "  GlobalOrigin = " << "( " << m_globalOrigin.x << ", "
+                                      << m_globalOrigin.y << ", "
+                                      << m_globalOrigin.z << " )"  << endl;
+    os << "  GlobalRegion = " << "( " << m_globalRegion.x << ", "
+                                      << m_globalRegion.y << ", "
+                                      << m_globalRegion.z << " )"  << endl;
 		os << "}" << endl;
 		os << endl;
 		os << "BCMTree { " << endl;

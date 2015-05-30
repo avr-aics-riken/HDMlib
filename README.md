@@ -19,5 +19,5 @@ This HDM library provides following functions for Hierarchical Cartesian structu
 COPYRIGHT
 =========
 
-Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
 All rights reserved.

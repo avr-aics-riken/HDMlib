@@ -1,7 +1,7 @@
 /*
  * HDMlib - Hierarchical Data Management library
  *
- * Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+ * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
  * All rights reserved.
  *
  */
@@ -9,6 +9,24 @@
 
 REVISION HISTORY
 ================
+
+------------------
+2015-05-30
+- Fix output tp file, vector notation in Domain {}
+- update date of copyright
+- rearrange doc/
+
+------------------
+2015-03-05
+- Fix build on Intel MPI compilerwith mpiFCCpx
+
+------------------
+2015-03-04
+- Fix build on Intel MPI compiler
+
+------------------
+2015-02-17
+- Move template code body to header file
 
 ------------------
 2014-05-15

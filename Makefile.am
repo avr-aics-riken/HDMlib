@@ -3,7 +3,7 @@
 #
 # HDMlib - Hierarchical Data Management library
 #
-# Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN. 
+# Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
 # All rights reserved.
 #
 #########################################################################
@@ -13,7 +13,8 @@ SUBDIRS = @MAKE_SUB_DIRS@
 
 bin_SCRIPTS = hdm-config
 CLEANFILES = $(bin_SCRIPTS)
-EXTRA_DIST = hdm-config.in LICENSE examples doc README.md
+EXTRA_DIST = hdm-config.in LICENSE examples doc README.md \
+             doc/doxygen/dox_HDMlib.conf doc/doxygen/make-ref-man
 dist_data_DATA = AUTHORS COPYING ChangeLog README LICENSE
 dist_include_HEADERS = include/mpi_stubs.h
 

@@ -1,7 +1,7 @@
 /*
  * HDMlib - Hierarchical Data Management library
  *
- * Copyright (c) 2013-2014 Advanced Institute for Computational Science, RIKEN.
+ * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
  * All rights reserved.
  *
  */
@@ -10,26 +10,16 @@
 RELEASE
 =======
 
--------------
+Version 0.6.0   2015-05-30
+
 Version 0.5.1   2014-05-15
- - update Vec3class 1.1
 
--------------
 Version 0.5.0   2014-04-02
- - update doc
 
--------------
 Version 0.4.0   2014-03-23
- - update Vec3.h
- 
--------------
+
 Version 0.3.0   2014-03-17
- - common namespace Vec3class
 
--------------
 Version 0.2.0   2014-03-15
- - class library
 
--------------
 Version 0.1.0   2014-01-25
- - make a repository 

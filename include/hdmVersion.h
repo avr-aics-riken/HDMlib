@@ -1,7 +1,7 @@
 /*
  * HDMlib - Hierarchical Data Management library
  *
- * Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN.
+ * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
  * All rights reserved.
  *
  */
@@ -15,10 +15,10 @@
 #define _HDM_VERSION_H_
 
 /** HDMライブラリのバージョン */
-#define HDM_VERSION_NO  "0.5.1"
+#define HDM_VERSION_NO  "0.6.0"
 
 /** HDMライブラリのリビジョン */
-#define HDM_REVISION    "20140515_1100"
+#define HDM_REVISION    "20150530_1600"
 
 #endif /* _HDM_VERSION_H_ */
 

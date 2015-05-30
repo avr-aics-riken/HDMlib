@@ -3,7 +3,7 @@
 #
 # HDMlib - Hierarchical Data Management library
 #
-# Copyright (c) 2014 Advanced Institute for Computational Science, RIKEN. 
+# Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
 # All rights reserved.
 #
 #########################################################################
@@ -13,13 +13,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.57])
-AC_INIT([HDMlib], [0.5.1], [keno@riken.jp],[HDMlib])
+AC_INIT([HDMlib], [0.6.0], [keno@riken.jp],[HDMlib])
 AM_INIT_AUTOMAKE()
 AC_CONFIG_SRCDIR([src/ErrorUtil.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 # revision No.
-HDM_REVISION="20140515_1100"
+HDM_REVISION="20150530_1600"
 AC_SUBST(HDM_REVISION)
 
 #
@@ -49,6 +49,9 @@ case "$HDM_CXX" in
   mpiCC)    enable_mpi="wrappermpi" ;;
   mpic++)   enable_mpi="wrappermpi" ;;
   mpiFCCpx) enable_mpi="wrappermpi" ;;
+  CC)       enable_mpi="wrappermpi" ;;
+  mpiicc)   enable_mpi="wrappermpi" ;;
+  mpiicpc)  enable_mpi="wrappermpi" ;;
 esac
 
 
