@@ -441,7 +441,7 @@ namespace BCMFileIO {
 		os << "}" << endl;
 		os << endl;
 		os << "LeafBlock {" << endl;
-		os << "  size = " << leafSize << endl << endl;
+		os << "  size = " << "( " << leafSize.x << ", " << leafSize.y << ", " << leafSize.z << " )" << endl << endl;
 		os << "  Unit { " << endl;
 		os << "    Length   = \"" << m_unit.length << "\"" << endl;
 		os << "    L0       = "   << m_unit.L0_scale << endl;
