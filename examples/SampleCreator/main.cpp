@@ -385,8 +385,8 @@ int main(int argc, char** argv)
 		int nPolygons = 0;
 		std::vector<PolylibNS::Triangle*>* polygonList;
 
-		PolylibNS::Vec3f bmin(org.x,         org.y,         org.z);
-		PolylibNS::Vec3f bmax(org.x + rgn.x, org.y + rgn.y, org.z + rgn.z);
+		Vec3class::Vec3f bmin(org.x,         org.y,         org.z);
+		Vec3class::Vec3f bmax(org.x + rgn.x, org.y + rgn.y, org.z + rgn.z);
 		polygonList = pl->search_polygons(polygonGroup, bmin, bmax, false);
 		nPolygons = polygonList->size();
 		delete polygonList;
@@ -399,8 +399,8 @@ int main(int argc, char** argv)
 			for(int z = 0; z < sz.z; z++){
 				for(int y = 0; y < sz.y; y++){
 					for(int x = 0; x < sz.x; x++){
-						PolylibNS::Vec3f min(org.x + (dx*x), org.y + (dy*y), org.z + (dz*z));
-						PolylibNS::Vec3f max(min[0] + dx, min[1] + dy, min[2] + dz);
+						Vec3class::Vec3f min(org.x + (dx*x), org.y + (dy*y), org.z + (dz*z));
+						Vec3class::Vec3f max(min[0] + dx, min[1] + dy, min[2] + dz);
 						polygonList = pl->search_polygons(polygonGroup, min, max, false);
 						if(polygonList->size() > 0){
 							data[idx(x, y, z)] = 1;

@@ -35,7 +35,7 @@ POLYLIB_STAT BCMPolylib::load(std::string config_filename)
   POLYLIB_STAT ret;
 
   // 設定ファイル読み込み。
-  if ((ret = Polylib::load_config_file(&m_config_contents, config_filename)) != PLSTAT_OK ) {
+  if ((ret = MPIPolylib::load_rank0(config_filename)) != PLSTAT_OK ) {
     PL_ERROSH << "[ERROR]MPIPolylib::load_rank0():Polylib::load_config() faild. returns:"
               << PolylibStat2::String(ret) << std::endl;
     return ret;
@@ -43,11 +43,11 @@ POLYLIB_STAT BCMPolylib::load(std::string config_filename)
 
   // グループ階層構造構築。
 //  if ((ret = Polylib::make_group_tree(m_config_contents)) != PLSTAT_OK ) {
-  if ((ret = Polylib::make_group_tree(config_filename)) != PLSTAT_OK ) {
-    PL_ERROSH << "[ERROR]MPIPolylib::load_rank0():Polylib::make_group_tree() faild. returns:"
-              << PolylibStat2::String(ret) << std::endl;
-    return ret;
-  }
+  //if ((ret = Polylib::make_group_tree(this->tp)) != PLSTAT_OK ) {
+  //  PL_ERROSH << "[ERROR]MPIPolylib::load_rank0():Polylib::make_group_tree() faild. returns:"
+  //            << PolylibStat2::String(ret) << std::endl;
+  //  return ret;
+  //}
 
   // ポリゴン情報を構築 (三角形IDファイルは不要なので、第二引数はダミー)
   if ((ret = load_polygons(false, ID_BIN)) != PLSTAT_OK) {

@@ -111,4 +111,4 @@ namespace BCMFileIO {
 
 } // namespace BCMFileIO
 
-#endif __BCMTOOLS_DIRUTIL_H__
+#endif // __BCMTOOLS_DIRUTIL_H__
