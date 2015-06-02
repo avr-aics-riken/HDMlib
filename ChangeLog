@@ -11,6 +11,10 @@ REVISION HISTORY
 ================
 
 ------------------
+2015-06-02
+- fix issues of pull request #4
+
+------------------
 2015-05-30
 - Fix output tp file, vector notation in Domain {}
 - update date of copyright
