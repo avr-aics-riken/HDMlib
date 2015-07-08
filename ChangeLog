@@ -12,6 +12,8 @@ REVISION HISTORY
 
 ------------------
 2015-07-08
+- forget adding BUILD_DIR
+
 - bug fix at reduceError (snd & rcv buffer were same)
 - introduce BUILD_DIR to keep source directory clean
 

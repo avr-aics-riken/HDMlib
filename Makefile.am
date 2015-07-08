@@ -14,6 +14,7 @@ SUBDIRS = @MAKE_SUB_DIRS@
 bin_SCRIPTS = hdm-config
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST = hdm-config.in LICENSE examples doc README.md \
+             BUILD_DIR/.gitkeep \
              doc/doxygen/dox_HDMlib.conf doc/doxygen/make-ref-man
 dist_data_DATA = AUTHORS COPYING ChangeLog README LICENSE
 dist_include_HEADERS = include/mpi_stubs.h
