@@ -21,10 +21,11 @@ HOW TO COMPILE
 
 1. with configure
 
-$ export FFV_HOME=/hogehoge
-$ ./configure [options]
+$ export FFV_HOME=hogehoge
+$ cd BUILD_DIR
+$ ../configure [options]
 $ make
-# make install
+$ make install
 
 
 
@@ -34,7 +35,7 @@ Configure options:
     Specify in case of cross-compilation.
 
  --prefix=INSTALL_DIR
-    Specify a directory to be installed. The default directory is /usr/local/CIOlib.
+    Specify a directory to be installed. The default directory is /usr/local/HDMlib.
 
  --with-ompi=OPENMPI_DIR
     If the OpenMPI library is used, specify the directory path that OpenMPI library is
@@ -62,7 +63,7 @@ Here is examples.
 
 ## for the combination of Intel compiler and OpenMPI.
 
-  $ ./configure --with-ompi=/opt/openmpi \
+ $ ../configure --with-ompi=/opt/openmpi \
                 --with-parser=${FFV_HOME}/TextParser \
                 --with-bcm=/usr/local/BCMTools \
                 CXX=icpc \
@@ -72,14 +73,14 @@ Here is examples.
 
 ## OpenMPI with wrapper compiler, assume that mpicxx is a wrapper compiler for OpenMPI.
 
-  $ ./configure --with-parser=${FFV_HOME}/TextParser \
+ $ ../configure --with-parser=${FFV_HOME}/TextParser \
                 --with-bcm=/usr/local/BCMTools \
                 --prefix=/usr/local/HDMlib CXX=mpicxx CXXFLAGS=-O3
 
 
 ## K-computer
 
-  $ ./configure --prefix=$1 \
+ $ ../configure --prefix=$1 \
                 --with-parser=hoge \
                 --with-bcm=hogehoge \
                 --host=sparc64-unknown-linux-gnu \

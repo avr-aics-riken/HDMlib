@@ -20,9 +20,10 @@
 namespace BCMFileIO {
 
 	bool ErrorUtil::reduceError(const bool err, MPI::Intracomm& comm) {
-		int ierr = err ? 1 : 0;
-		comm.Allreduce(&ierr, &ierr, 1, MPI::INT, MPI::BOR);
-		return ierr == 0 ? false : true;
+		int ierr_s = err ? 1 : 0;
+    int ierr_r = ierr_s;
+		comm.Allreduce(&ierr_s, &ierr_r, 1, MPI::INT, MPI::BOR);
+		return ierr_r == 0 ? false : true;
 	}
 
 

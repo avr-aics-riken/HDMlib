@@ -11,6 +11,11 @@ REVISION HISTORY
 ================
 
 ------------------
+2015-07-08
+- bug fix at reduceError (snd & rcv buffer were same)
+- introduce BUILD_DIR to keep source directory clean
+
+------------------
 2015-06-02
 - fix issues of pull request #4
 

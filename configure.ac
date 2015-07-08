@@ -13,13 +13,48 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.57])
-AC_INIT([HDMlib], [0.6.1], [keno@riken.jp],[HDMlib])
-AM_INIT_AUTOMAKE()
+AC_INIT([HDMlib], [0.7.0], [keno@riken.jp],[HDMlib])
+
+echo "----------------------------------------"
+echo "Running HDMlib Configure Script"
+echo "----------------------------------------"
+
 AC_CONFIG_SRCDIR([src/ErrorUtil.cpp])
+
+#
+# Specify directory for auxillary build tools (e.g., install-sh, config.sub, config.guess) and M4 files.
+#
+
+AC_CONFIG_AUX_DIR(config)
+
+
+#
+# To prevent the source codes from breaking, we suppress to do configure in the source directory.
+#
+
+if test -e configure.ac ; then
+echo "Please run configure from a separate build directory. It is not allowd to run configure in the source directory."
+echo "Pleaes try ..."
+echo " "
+echo "$ cd BUILD_DIR"
+echo "$ ../configure [options]"
+exit
+fi
+
+
+#
+# Configure should create config.h from config.h.in
+#
+
 AC_CONFIG_HEADERS([config.h])
 
+
+AM_INIT_AUTOMAKE()
+
+
+
 # revision No.
-HDM_REVISION="20150602_1000"
+HDM_REVISION="20150708_1400"
 AC_SUBST(HDM_REVISION)
 
 #
@@ -202,3 +237,7 @@ AC_OUTPUT
 
 
 chmod +x ./hdm-config
+
+echo "---------------------------------------------"
+echo "Finished Running HDMlib Configure Script"
+echo "---------------------------------------------"
