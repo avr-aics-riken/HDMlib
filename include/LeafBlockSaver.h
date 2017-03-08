@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -25,12 +31,12 @@ using namespace Vec3class;
 class BlockManager;
 
 namespace BCMFileIO {
-	
+
 	class LeafBlockSaver {
 	public:
 
 		/// LeafBlockファイル(CellID)の出力
-		/// 
+		///
 		/// @param[in] comm      MPIコミュニケータ
 		/// @param[in] ib        ブロック情報
 		/// @param[in] size      リーフブロックサイズ
@@ -39,7 +45,7 @@ namespace BCMFileIO {
 		/// @param[in] rle       RLE圧縮フラグ (trueの場合RLE圧縮を行う)
 		///
 		/// @return 成功した場合true, 失敗した場合false
-		/// 
+		///
 		static bool SaveCellID( const MPI::Intracomm& comm,
 								const IdxBlock*       ib,
 								const Vec3i&          size,
@@ -49,24 +55,24 @@ namespace BCMFileIO {
 
 
 		/// LeafBlockファイル(物理量)の出力
-		/// 
+		///
 		/// @param[in] comm         MPIコミュニケータ
 		/// @param[in] ib           ブロック情報
 		/// @param[in] blockManager ブロックマネージャ
 		/// @param[in] step         出力タイムステップのインデックス番号
-		/// 
+		///
 		/// @return 成功した場合true, 失敗した場合false
 		///
 		static bool SaveData(const MPI::Intracomm& comm,
-							 const IdxBlock*       ib, 
-							 BlockManager&         blockManager, 
+							 const IdxBlock*       ib,
+							 BlockManager&         blockManager,
 							 const unsigned int    step);
-		
+
 	private:
 		template<typename T>
 		static bool _SaveData(const MPI::Intracomm& comm,
-								  const IdxBlock*       ib, 
-								  BlockManager&         blockManager, 
+								  const IdxBlock*       ib,
+								  BlockManager&         blockManager,
 								  const unsigned int    step);
 
 		template<typename T>
@@ -76,4 +82,3 @@ namespace BCMFileIO {
 } // BCMFileIO
 
 #endif // __BCMTOOLS_LEAFBLOCK_SAVER_H__
-

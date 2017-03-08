@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -31,7 +37,7 @@ namespace BCMFileIO {
 
 		/// コンストラクタ
 		IdxStep();
-		
+
 		/// コンストラクタ
 		///
 		/// @param[in] rangeMin      タイムステップレンジの開始インデックス
@@ -39,7 +45,7 @@ namespace BCMFileIO {
 		/// @param[in] rangeInterval ステップ間隔
 		///
 		IdxStep(const unsigned int rangeMin, const unsigned int rangeMax, const unsigned int rangeInterval=1);
-		
+
 		/// デストラクタ
 		~IdxStep();
 
@@ -53,7 +59,7 @@ namespace BCMFileIO {
 		bool SetRange(const unsigned int rangeMin, const unsigned int rangeMax, const unsigned int rangeInterval=1);
 
 		/// 追加ステップの設定
-		/// 
+		///
 		/// @param[in] step 追加ステップ
 		///
 		void AddStep(const unsigned int step );
@@ -76,7 +82,7 @@ namespace BCMFileIO {
 		/// @param[in] time Step = 0における時刻
 		///
 		void SetInitalTime(float time);
-		
+
 		/// Step間の時刻幅を設定
 		///
 		/// @param[in] deltaT Step間の時刻幅
@@ -95,7 +101,7 @@ namespace BCMFileIO {
 		/// @return 開始インデックス
 		///
 		unsigned int GetRangeMin() const;
-		
+
 		/// ステップの終了インデックスを取得
 		///
 		/// @return 終了インデックス
@@ -113,19 +119,19 @@ namespace BCMFileIO {
 		/// @return 追加ステップリスト
 		///
 		const std::vector<unsigned int>& GetAddStepList() const;
-		
+
 		/// 削除ステップリストを取得
-		/// 
+		///
 		/// @return 削除ステップリスト
 		///
 		const std::vector<unsigned int>& GetSubStepList() const;
-		
+
 		/// Step = 0における時刻を取得
-		/// 
+		///
 		/// @return Step = 0における時刻
 		///
 		float GetInitialTime() const;
-		
+
 		/// Step間の時間幅を取得
 		///
 		/// @return Step間の時間幅
@@ -145,4 +151,3 @@ namespace BCMFileIO {
 } // namespace BCMFileIO
 
 #endif // __BCMTOOLS_IDXSTEP_H__
-

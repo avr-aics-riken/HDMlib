@@ -1,12 +1,15 @@
 /*
- * BCMTools
- *
- * Copyright (C) 2011-2013 Institute of Industrial Science, The University of Tokyo.
- * All rights reserved.
- *
- * Copyright (c) 2012-2013 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 #ifndef POLYGON_DIVIDER_H
@@ -32,16 +35,16 @@ class PolygonDivider : public MultiRootDivider {
 
   const std::vector<PolygonGroupSpec>& polygonGroupList;
 
-  const std::vector<BoundingBoxSpec>& boundingBoxList; 
+  const std::vector<BoundingBoxSpec>& boundingBoxList;
 
   double marginRatio;
 
 public:
 
-  PolygonDivider(const Vec3d& origin, double rootLength, const RootGrid* rootGrid, 
+  PolygonDivider(const Vec3d& origin, double rootLength, const RootGrid* rootGrid,
                  int minLevel, const PolylibNS::BCMPolylib* pl,
                  const std::vector<PolygonGroupSpec>& polygonGroupList,
-                 const std::vector<BoundingBoxSpec>& boundingBoxList, 
+                 const std::vector<BoundingBoxSpec>& boundingBoxList,
                  double marginRatio = 0.0)
     : MultiRootDivider(origin, rootLength, rootGrid),
       minLevel(minLevel), pl(pl),
@@ -80,7 +83,7 @@ public:
         region.setMargin(marginRatio / (1 << maxLevel));
         Vec3class::Vec3f min(region.getMin().x, region.getMin().y, region.getMin().z);
         Vec3class::Vec3f max(region.getMax().x, region.getMax().y, region.getMax().z);
-        std::vector<PolylibNS::Triangle*>* polygonList 
+        std::vector<PolylibNS::Triangle*>* polygonList
                         = pl->search_polygons(polygonGroup, min, max, false);
         int nPolygon = polygonList->size();
         delete polygonList;

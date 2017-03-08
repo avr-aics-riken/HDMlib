@@ -1,12 +1,15 @@
 /*
- * BCMTools
- *
- * Copyright (C) 2011-2013 Institute of Industrial Science, The University of Tokyo.
- * All rights reserved.
- *
- * Copyright (c) 2012-2013 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 #include <iostream>
@@ -87,7 +90,7 @@ void print<unsigned char>(const char* prefix, const int dcid, const int vc){
 
 int main(int argc, char** argv)
 {
-	using namespace std;	
+	using namespace std;
 
 	if(argc != 3){
 		printf("err : useage %s <input (cellid.bcm)> <input (data.bcm)>\n", argv[0]);
@@ -112,10 +115,10 @@ int main(int argc, char** argv)
 		printf("err : Load File Error %s)\n", argv[2]);
 		return -1;
 	}
-	
+
 	// Temperatureのタイムステップを取得
 	const BCMFileIO::IdxStep* tmpStep = loader.GetStep("Tmp32");
-	
+
 	// タイムステップのリストを取得
 	const std::list<unsigned int>* tmpStepList = tmpStep->GetStepList();
 
@@ -169,16 +172,16 @@ int main(int argc, char** argv)
 
 		loader.LoadLeafBlock( id_v32, "Vel32", vc, *it);
 		loader.LoadLeafBlock( id_v64, "Vel64", vc, *it);
-		
+
 		// 各データの中身をテキストファイルに出力 (for debug)
 		char prefix[128];
 		sprintf(prefix, "tmp32_%03d", *it);   print<float >(prefix, id_s32, vc);
 		sprintf(prefix, "tmp64_%03d", *it);   print<double>(prefix, id_s64, vc);
-                                             
+
 		sprintf(prefix, "vel32_u_%03d", *it); print<float >(prefix, id_v32[0], vc);
 		sprintf(prefix, "vel32_v_%03d", *it); print<float >(prefix, id_v32[1], vc);
 		sprintf(prefix, "vel32_w_%03d", *it); print<float >(prefix, id_v32[2], vc);
-                                             
+
 		sprintf(prefix, "vel64_u_%03d", *it); print<double>(prefix, id_v64[0], vc);
 		sprintf(prefix, "vel64_v_%03d", *it); print<double>(prefix, id_v64[1], vc);
 		sprintf(prefix, "vel64_w_%03d", *it); print<double>(prefix, id_v64[2], vc);
@@ -196,4 +199,3 @@ int main(int argc, char** argv)
 
 	return EX_SUCCESS;
 }
-

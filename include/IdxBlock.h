@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -39,7 +45,7 @@ namespace BCMFileIO {
 		{}
 
 		/// データクラスIDからブロック情報を取得するユーティリティ関数
-		/// 
+		///
 		/// @param[in] idxBlockList ブロック情報リスト
 		/// @param[in] dataClassID  データクラスID
 		/// @return ブロック情報のポインタ
@@ -56,7 +62,7 @@ namespace BCMFileIO {
 		}
 
 		/// 系の名称からブロック情報を取得するユーティリティ関数
-		/// 
+		///
 		/// @param[in] idxBlockList ブロック情報リスト
 		/// @param[in] name         系の名称
 		/// @return ブロック情報のポインタ
@@ -71,7 +77,7 @@ namespace BCMFileIO {
 		}
 
 		/// データクラスIDからブロック情報を取得するユーティリティ関数 (const用)
-		/// 
+		///
 		/// @param[in] idxBlockList ブロック情報リスト
 		/// @param[in] dataClassID  データクラスID
 		/// @return ブロック情報のポインタ
@@ -88,7 +94,7 @@ namespace BCMFileIO {
 		}
 
 		/// 系の名称からブロック情報を取得するユーティリティ関数 (const用)
-		/// 
+		///
 		/// @param[in] idxBlockList ブロック情報リスト
 		/// @param[in] name         系の名称
 		/// @return ブロック情報のポインタ
@@ -125,4 +131,3 @@ namespace BCMFileIO {
 } // namespace BCMFileIO
 
 #endif // __BCMTOOLS_IDXBLOCK_H__
-

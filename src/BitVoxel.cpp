@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -40,7 +46,7 @@ namespace BCMFileIO
 
 		bitVoxelCell* bitVoxel = new bitVoxelCell[bsz];
 		memset(bitVoxel, 0, sizeof(bitVoxelCell) * bsz);
-		
+
 		unsigned char mask = 0;
 		for(int i = 0; i < bitWidth; i++) mask += (1 << i);
 
@@ -80,4 +86,3 @@ namespace BCMFileIO
 
 
 } // namespace BCMFileIO
-

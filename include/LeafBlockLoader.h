@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -40,7 +46,7 @@ namespace BCMFileIO {
 		};
 
 		/// LeafBlockファイル(CellID)の読み込み (Gatherなし)
-		/// 
+		///
 		/// @param[in]  dir         入力元ディレクトリ
 		/// @param[in]  ib          ブロック情報
 		/// @param[in]  comm        MPIコミュニケータ
@@ -48,21 +54,21 @@ namespace BCMFileIO {
 		/// @param[out] header      LeafBlockファイルヘッダ
 		/// @param[out] cidCapsules 自プロセスが担当するデータのリスト
 		/// @return 成功した場合true, 失敗した場合false
-		/// 
+		///
 		/// @note cidCapsulesに入る値はファイルから読み込んだ生の状態．
 		///       圧縮符号やbitVoxelの展開，真に必要なデータの選択は
 		///       ここでは実施しない
-		/// 
-		static bool LoadCellID( const std::string&          dir, 
-								const IdxBlock*             ib, 
-								const MPI::Intracomm&       comm, 
+		///
+		static bool LoadCellID( const std::string&          dir,
+								const IdxBlock*             ib,
+								const MPI::Intracomm&       comm,
 								PartitionMapper*            pmapper,
-								LBHeader&                   header, 
+								LBHeader&                   header,
 								std::vector<CellIDCapsule>& cidCapsules );
 
 
 		/// LeafBlockファイル(CellID)の読み込み (Gatherあり)
-		/// 
+		///
 		/// @param[in]  dir         入力元ディレクトリ
 		/// @param[in]  ib          ブロック情報
 		/// @param[in]  comm        MPIコミュニケータ
@@ -70,31 +76,31 @@ namespace BCMFileIO {
 		/// @param[out] header      LeafBlockファイルヘッダ
 		/// @param[out] cidCapsules 自プロセスが担当するデータのリスト
 		/// @return 成功した場合true, 失敗した場合false
-		/// 
+		///
 		/// @note cidCapsulesに入る値はファイルから読み込んだ生の状態．
 		///       圧縮符号やbitVoxelの展開，真に必要なデータの選択は
 		///       ここでは実施しない
-		/// 
-		static bool LoadCellID_Gather( const std::string&          dir, 
-									   const IdxBlock*             ib, 
-									   const MPI::Intracomm&       comm, 
+		///
+		static bool LoadCellID_Gather( const std::string&          dir,
+									   const IdxBlock*             ib,
+									   const MPI::Intracomm&       comm,
 									   PartitionMapper*            pmapper,
-									   LBHeader&                   header, 
+									   LBHeader&                   header,
 									   std::vector<CellIDCapsule>& cidCapsules );
 
 		/// 圧縮データの展開
-		/// 
+		///
 		/// @param[in] header     LeafBlockファイルヘッダ
 		/// @param[in] cidCapsule CellIDカプセル
 		/// @return 展開後のデータ (失敗した場合NULLを返す．)
-		/// 
+		///
 		/// @note cidCapsuleのdataはこの関数内で解放される．
-		/// 
+		///
 		static unsigned char* DecompCellIDData( const LBHeader &header,  const CellIDCapsule& cidCapsule);
 
 
 		/// LeafBlockファイル(Scalar)の読み込み
-		/// 
+		///
 		/// @param[in] comm           MPIコミュニケータ
 		/// @param[in] ib             ブロック情報
 		/// @param[in] blockManager   ブロックマネージャ
@@ -128,22 +134,22 @@ namespace BCMFileIO {
 		///
 		template<typename T>
 		static bool CopyBufferToScalar3D(BlockManager& blockManager, const int dataClassID, const int blockID, const int vc, const T*  buf)
-		{       
+		{
 			Vec3i size = blockManager.getSize();
-							
+
 			BlockBase* block = blockManager.getBlock(blockID);
 			Scalar3D<T>* mesh = dynamic_cast< Scalar3D<T>* >(block->getDataClass(dataClassID));
-			T* data      = mesh->getData();         
-			Index3DS idx = mesh->getIndex();                
-											
-			for(int z = -vc; z < size.z + vc; z++){                 
-				for(int y = -vc; y < size.y + vc; y++){                             
-					for(int x = -vc; x < size.x + vc; x++){                                             
+			T* data      = mesh->getData();
+			Index3DS idx = mesh->getIndex();
+
+			for(int z = -vc; z < size.z + vc; z++){
+				for(int y = -vc; y < size.y + vc; y++){
+					for(int x = -vc; x < size.x + vc; x++){
 						size_t loc = ( (x+vc) + ((y+vc) + (z+vc) * (size.y + (vc*2))) * (size.x + (vc*2)) );
-						data[idx(x, y, z)] = buf[loc];                                                                          
+						data[idx(x, y, z)] = buf[loc];
 					}
-				}                                                                                                                               }   
-			return true;                                                                                                                    }  
+				}                                                                                                                               }
+			return true;                                                                                                                    }
 
 	private:
 		/// BitVoxelサイズを取得する
@@ -164,4 +170,3 @@ namespace BCMFileIO {
 } // namespace BCMFileIO
 
 #endif// __BCMTOOLS_LEAF_BLOCK_LOADER_H__
-

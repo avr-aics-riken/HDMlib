@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -44,7 +50,7 @@ namespace BCMFileIO {
 #pragma pack(1)
 #define ALIGNMENT
 #endif // __GNUC__
-	
+
 	/// Octreeファイルヘッダ構造体
 	struct OctHeader
 	{
@@ -57,7 +63,7 @@ namespace BCMFileIO {
 		uint64_t     padding;      ///< 16バイトアライメント用パディング
 
 		OctHeader() : padding(0) {}
-	
+
 	} ALIGNMENT;
 
 	/// LeafBlockファイルヘッダ構造体
@@ -72,7 +78,7 @@ namespace BCMFileIO {
 		uint64_t       numBlock;   ///< ファイルに記載されている総ブロック数
 
 	} ALIGNMENT;
-	
+
 	/// LeafBlockのCellIDヘッダ構造体
 	struct LBCellIDHeader
 	{
@@ -108,7 +114,7 @@ namespace BCMFileIO {
 		LB_VECTOR6 = 6, ///< ベクトル (6要素)
 		LB_TENSOR  = 9, ///< テンソル (9要素)
 	};
-	
+
 	/// リーフセルのデータ識別子
 	enum LB_DATA_TYPE
 	{
@@ -168,4 +174,3 @@ namespace BCMFileIO {
 } // namespace BCMFileIO
 
 #endif // __BCMTOOLS_BCM_FILE_HEADER_H__
-

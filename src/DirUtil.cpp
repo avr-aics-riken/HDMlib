@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 #include "ErrorUtil.h"
@@ -16,8 +22,8 @@
 
 #include <algorithm>
 #include <sys/types.h>
-#include <sys/stat.h> 
-#include <unistd.h> 
+#include <sys/stat.h>
+#include <unistd.h>
 #include <dirent.h>
 
 
@@ -28,12 +34,12 @@ namespace BCMFileIO {
 	{
 		m_opened = false;
 		m_dirpath = std::string(dirname);
-		
+
 		m_dirname = parseFilename(dirname,  "/");
-		DIR* pDir = opendir(dirname);	
+		DIR* pDir = opendir(dirname);
 		if (!pDir)
 			return;
-		
+
 		dirent* pEnt = readdir(pDir);
 	    while (pEnt)
 		{
@@ -44,7 +50,7 @@ namespace BCMFileIO {
 				struct stat wStat;
 	            if ( stat( wPathName.c_str(), &wStat ) )
 	                break;
-	            
+
 	            if ( S_ISDIR( wStat.st_mode ) )
 					m_dirs.push_back(pEnt->d_name);
 	            else
@@ -55,13 +61,13 @@ namespace BCMFileIO {
 		closedir(pDir);
 		m_opened = true;
 	}
-		
+
 	/// ディレクトリがオープン中か返却
 	bool DirUtil::IsOpened() const
 	{
 		return m_opened;
 	}
-		
+
 	/// ディレクトリ内のファイル数を取得
 	unsigned int DirUtil::GetFileCount() const
 	{
@@ -80,7 +86,7 @@ namespace BCMFileIO {
 		static std::string nullstring;
 		if (i >= m_files.size())
 			return nullstring;
-		
+
 		return m_files[i];
 	}
 
@@ -90,7 +96,7 @@ namespace BCMFileIO {
 		static std::string nullstring;
 		if (i >= m_dirs.size())
 			return nullstring;
-		
+
 		return m_dirs[i];
 	}
 
@@ -122,7 +128,7 @@ namespace BCMFileIO {
 		it = std::find(m_dirs.begin(), m_dirs.end(), dirname);
 		if (it != m_dirs.end())
 			return true;
-		
+
 		const mode_t mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 		if ( mkdir(dirpath.c_str(), mode) != 0 )
 		{
@@ -130,7 +136,7 @@ namespace BCMFileIO {
 			DirUtil check(dirpath.c_str());
 			return check.IsOpened();
 		}
-	
+
 		return true;
 	}
 

@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -39,21 +45,21 @@ namespace BCMFileIO {
 		static const char *log_header[4] = {
 			"[ERR]", "[WRN]", "[INF]", "[DBG]"
 		};
-	
+
 		MPI::Intracomm& comm = MPI::COMM_WORLD;
 		char rankstr[128];
 		sprintf(rankstr, "[RANK:%6d]", comm.Get_rank());
-		
+
 		std::string logstr(rankstr);
 		logstr += std::string(" ") + std::string(log_header[level]) + std::string(" ") + msg;
-	
+
 	#ifdef _WIN32
 		OutputDebugStringA(logstr.c_str());
 	#else
-		printf("%s", logstr.c_str());	
+		printf("%s", logstr.c_str());
 	#endif
 	}
-	
+
 	void Logger::Error(const char *format, ...)
 	{
 		char buf[256];
@@ -61,10 +67,10 @@ namespace BCMFileIO {
 		va_start(arg, format);
 		vsprintf(buf, format, arg);
 		va_end(arg);
-		
+
 		Log(LOG_ERROR, buf);
 	}
-	
+
 	void Logger::Warn(const char *format, ...)
 	{
 		char buf[256];
@@ -72,10 +78,10 @@ namespace BCMFileIO {
 		va_start(arg, format);
 		vsprintf(buf, format, arg);
 		va_end(arg);
-		
+
 		Log(LOG_WARN, buf);
 	}
-	
+
 	void Logger::Info(const char *format, ...)
 	{
 		char buf[256];
@@ -83,10 +89,10 @@ namespace BCMFileIO {
 		va_start(arg, format);
 		vsprintf(buf, format, arg);
 		va_end(arg);
-		
+
 		Log(LOG_INFO, buf);
 	}
-	
+
 	void Logger::Debug(const char *format, ...)
 	{
 		char buf[256];
@@ -94,10 +100,9 @@ namespace BCMFileIO {
 		va_start(arg, format);
 		vsprintf(buf, format, arg);
 		va_end(arg);
-		
+
 		Log(LOG_DEBUG, buf);
 	}
 
 
 } // namespace BCMFileIO
-	

@@ -1,12 +1,15 @@
 /*
- * BCMTools
- *
- * Copyright (C) 2011-2013 Institute of Industrial Science, The University of Tokyo.
- * All rights reserved.
- *
- * Copyright (c) 2012-2013 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 #ifndef BCM_POLYLIB_H
@@ -63,7 +66,7 @@ private:
 	POLYLIB_STAT move(PolylibMoveParams &params);
 
 	POLYLIB_STAT migrate();
-  
+
 };
 
 }

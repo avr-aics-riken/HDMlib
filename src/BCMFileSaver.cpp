@@ -1,15 +1,21 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
 /// @file  BCMFileSaver.cpp
 /// @brief BCMファイルを出力するクラス
-/// 
+///
 #include "BCMOctree.h"
 #include "RootGrid.h"
 #include "BlockManager.h"
@@ -56,9 +62,9 @@ namespace BCMFileIO {
 	{
 
 	}
-	
-	bool BCMFileSaver::RegisterCellIDInformation( const int          dataClassID, 
-                                                  const unsigned int bitWidth, 
+
+	bool BCMFileSaver::RegisterCellIDInformation( const int          dataClassID,
+                                                  const unsigned int bitWidth,
 												  const short        vc,
                                                   const std::string& name,
                                                   const std::string& prefix,
@@ -143,7 +149,7 @@ namespace BCMFileIO {
 		ib.step         = step;
 
 		m_idxBlockList.push_back(ib);
-		
+
 		return true;
 	}
 
@@ -214,7 +220,7 @@ namespace BCMFileIO {
 				err = !FileSystemUtil::CreateDirectory(lbdir, lbdir.find("/") == 0 ? true : false);
 			}
 
-			if( ErrorUtil::reduceError(err) ){ 
+			if( ErrorUtil::reduceError(err) ){
 				Logger::Error("Cannot Create Output Directory (%s) [%s:%d]\n", lbdir.c_str(), __FILE__, __LINE__);
 				return false;
 			}
@@ -245,7 +251,7 @@ namespace BCMFileIO {
 				return false;
 			}
 		}
-		
+
 		return true;
 
 	}
@@ -284,11 +290,11 @@ namespace BCMFileIO {
 		}else{
 			m_comm.Send(hostname, nameLen, MPI::CHAR, 0, m_comm.Get_rank());
 		}
-		
+
 		if( m_comm.Get_rank() != 0){
 			return true;
 		}
-		
+
 		stringstream os;
 		os.setf(ios::scientific);
 		os.precision(6);
@@ -326,7 +332,7 @@ namespace BCMFileIO {
 			return false;
 		}
 
-		ofs << os.str(); 
+		ofs << os.str();
 
 		for(int i = 0; i < m_comm.Get_size(); i++) delete [] hostnameList[i];
 		delete hostnameList;
@@ -347,7 +353,7 @@ namespace BCMFileIO {
 				break;
 			}
 		}
-		if( !ib ) { 
+		if( !ib ) {
 			return true;
 		}
 
@@ -388,14 +394,14 @@ namespace BCMFileIO {
 		os << "    GatherMode      = \"" << (ib->isGather ? string("gathered") : string("distributed")) << "\"" << endl;
 		os << "  }" << endl;
 		os << "}" << endl;
-		
+
 		std::string filepath = m_targetDir + std::string("cellid.bcm");
 		ofstream ofs( filepath.c_str() );
 		if( !ofs ){
 			Logger::Error("failed to open file (%s) .[%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 			return false;
 		}
-		
+
 		ofs << os.str();
 		return true;
 	}
@@ -493,7 +499,7 @@ namespace BCMFileIO {
 			Logger::Error("failed to open file (%s) .[%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 			return false;
 		}
-		
+
 		ofs << os.str();
 		return true;
 	}
@@ -507,7 +513,7 @@ namespace BCMFileIO {
 			Logger::Error("less number of leafs than number of procs. [%s:%d]\n", __FILE__, __LINE__);
 			return false;
 		}
-		
+
 		ostringstream os;
 		os.setf(ios::scientific);
 		os.precision(6);
@@ -522,7 +528,7 @@ namespace BCMFileIO {
 
 		return true;
 	}
-	
+
 	bool BCMFileSaver::SaveOctree( const std::string& filepath, const BCMOctree* octree)
 	{
 		using namespace std;
@@ -530,7 +536,7 @@ namespace BCMFileIO {
 		if( m_comm.Get_rank() != 0 ){
 			return true;
 		}
-		
+
 		FILE *fp = NULL;
 		if( (fp = fopen(filepath.c_str(), "wb")) == NULL ){
 			Logger::Error("faild open file (%s) .[%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
@@ -557,14 +563,14 @@ namespace BCMFileIO {
 		const vector<Node*> nodes  = octree->getLeafNodeArray();
 		vector<Pedigree>    pedigs;
 		pedigs.reserve(octree->getNumLeafNode());
-		
+
 		int maxLevel = 0;
 		for(vector<Node*>::const_iterator it = nodes.begin(); it != nodes.end(); ++it){
 			const Node* n = *it;
 			maxLevel = n->getLevel() > maxLevel ? n->getLevel() : maxLevel;
 			pedigs.push_back(n->getPedigree());
 		}
-		
+
 		header.maxLevel = maxLevel;
 
 		fwrite(&header, sizeof(header), 1, fp);
@@ -606,4 +612,3 @@ namespace BCMFileIO {
 	}
 
 } // namespace BCMFileIO
-

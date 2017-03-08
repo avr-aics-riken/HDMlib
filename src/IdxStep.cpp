@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -88,7 +94,7 @@ namespace BCMFileIO {
 	{
 		m_time   = time;
 	}
-		
+
 	// #############################################################
 	// Step間の時刻幅を設定
 	void IdxStep::SetDeltaT(float deltaT)
@@ -107,7 +113,7 @@ namespace BCMFileIO {
 		for(unsigned int i = m_rangeMin; i <= m_rangeMax; i+= m_rangeInterval){
 			steps->push_back(i);
 		}
-			
+
 		// 追加リストからのステップ追加
 		for(std::vector<unsigned int>::const_iterator it = m_adds.begin(); it != m_adds.end(); ++it){
 			steps->push_back((*it));
@@ -117,12 +123,12 @@ namespace BCMFileIO {
 		for(std::vector<unsigned int>::const_iterator it = m_subs.begin(); it != m_subs.end(); ++it){
 			steps->remove((*it));
 		}
-			
+
 		steps->sort();
 
 		return steps;
 	}
-		
+
 	// #############################################################
 	// ステップの開始インデックスを取得
 	unsigned int IdxStep::GetRangeMin() const
@@ -164,7 +170,7 @@ namespace BCMFileIO {
 	{
 		return m_time;
 	}
-		
+
 	// #############################################################
 	// Step間の時間幅を取得
 	float IdxStep::GetDeltaT() const

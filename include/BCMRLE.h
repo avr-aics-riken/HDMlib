@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -22,7 +28,7 @@ namespace BCMFileIO {
 	class BCMRLE {
 	public:
 		/// RLE圧縮
-		/// 
+		///
 		/// @param[in]  source     入力データの先頭ポインタ
 		/// @param[in]  sourceSize 入力データのサイズ (Byte単位で指定)
 		/// @param[out] destSize   出力データのサイズ (Byte単位で指定)
@@ -53,15 +59,15 @@ namespace BCMFileIO {
 
 			const runlen_t maxCount = (runlen_t)~0;
 			const size_t endData = sourceSize / sizeof(rluint_t);
-			
+
 			const rluint_t* pSrc = source;
-		
+
 			size_t maxSize = sourceSize * sizeof(rluint_t) + sourceSize * sizeof(runlen_t);
 			unsigned char*  dest = new unsigned char[maxSize];
 			memset(dest, 0, maxSize * sizeof(unsigned char));
-		
+
 			DR* pdr = reinterpret_cast<DR*>(dest);
-		
+
 			pdr[0].d   = pSrc[0];
 			pdr[0].len = 1;
 			size_t cnt = 0;
@@ -78,14 +84,14 @@ namespace BCMFileIO {
 					pdr[cnt].len++;
 				}
 			}
-		
+
 			*destSize = (cnt + 1) * sizeof(DR);
-		
+
 			return dest;
 		}
-		
+
 		/// RLE展開
-		/// 
+		///
 		/// @param[in]  source     入力データの先頭ポインタ (RLE圧縮符号)
 		/// @param[in]  sourceSize 入力データのサイズ (Byte単位で指定)
 		/// @param[out] destSize   出力データのサイズ (Byte単位で指定)
@@ -113,14 +119,14 @@ namespace BCMFileIO {
 			#else  // __GNUC__
 			#pragma pack()
 			#endif // __GNUC__
-			
+
 			size_t endData = destSize / sizeof(rluint_t);
-		
+
 			rluint_t* dest = new rluint_t[endData];
-		
+
 			const DR* pdr = reinterpret_cast<const DR*>(source);
 			size_t num = sourceSize / sizeof(DR);
-			
+
 			size_t cnt = 0;
 			for(size_t i = 0; i < num; i++){
 				for(runlen_t l = 0; l < pdr->len; l++){
@@ -133,7 +139,7 @@ namespace BCMFileIO {
 				}
 				pdr++;
 			}
-		
+
 			return dest;
 		}
 

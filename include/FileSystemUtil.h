@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -19,8 +25,8 @@
 
 #include <algorithm>
 #include <sys/types.h>
-#include <sys/stat.h> 
-#include <unistd.h> 
+#include <sys/stat.h>
+#include <unistd.h>
 #include <dirent.h>
 
 #include <string>
@@ -79,7 +85,7 @@ namespace BCMFileIO {
 		{
 			std::string cpath = ConvertPath(path);
 			std::string filename = cpath.substr(cpath.rfind("/")+1);
-			
+
 			return filename.substr(0, filename.rfind("."));
 		}
 
@@ -107,31 +113,31 @@ namespace BCMFileIO {
 		///
 		static bool CreateDirectory(const std::string& path, bool absolutePath = false)
 		{
-			
+
 			std::vector<std::string> dirList;
 			split(path, '/', dirList);
-			
+
 			std::string npath;
 			if( absolutePath ){
 				npath = std::string("/");
 			}else{
 				npath = std::string("./");
 			}
-		
+
 			for(std::vector<std::string>::iterator it = dirList.begin(); it != dirList.end(); ++it){
 				DirUtil dir(npath.c_str());
-				
+
 				if( *it == std::string(".")  ){ continue; }
 				if( *it == std::string("..") ){ npath += *it + std::string("/"); continue; }
-		
-				if( !dir.CreateDir(it->c_str()) ){ 
+
+				if( !dir.CreateDir(it->c_str()) ){
 					Logger::Error("cannnot create directory : %s\n", (npath + *it).c_str());
 					return false;
 				}
-				
+
 				npath += *it + std::string("/");
 			}
-		
+
 			return true;
 		}
 
@@ -145,9 +151,9 @@ namespace BCMFileIO {
 		static bool split(const std::string& input, const char delimiter, std::vector<std::string>& output)
 		{
 			output.clear();
-			
+
 			std::string istr = input;
-			
+
 			size_t p = 0;
 			while( (p = istr.find(delimiter)) != std::string::npos ){
 				if(p != 0){
@@ -155,9 +161,9 @@ namespace BCMFileIO {
 				}
 				istr.erase(istr.begin(), istr.begin() + p + 1);
 			}
-		
+
 			if( istr.length() != 0 ) output.push_back(istr);
-		
+
 			return true;
 		}
 	};

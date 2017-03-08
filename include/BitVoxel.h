@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -55,14 +61,14 @@ namespace BCMFileIO {
 		static bitVoxelCell* Compress( size_t* bitVoxelSize, const size_t voxelSize, const unsigned char* voxel, const unsigned char  bitWidth);
 
 		/// ビットボクセル展開
-		/// 
+		///
 		/// @param[in] bitVoxelSize ボクセルサイズ (展開後のボクセル数)
 		/// @param[in] bitVoxel     入力ビットボクセル
 		/// @param[in] bitWidth     ビット幅
 		/// @return 展開されたボクセルの先頭ポインタ
-		/// 
+		///
 		/// @note returnされたポインタは適宜解放(delete)してください．
-		/// 
+		///
 		static unsigned char* Decompress( const size_t voxelSize, const bitVoxelCell* bitVoxel, const unsigned char  bitWidth);
 	};
 
@@ -70,4 +76,3 @@ namespace BCMFileIO {
 
 
 #endif // __BCMTOOLS_BITVOXEL_H__
-

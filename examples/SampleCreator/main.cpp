@@ -1,12 +1,15 @@
 /*
- * BCMTools
- *
- * Copyright (C) 2011-2013 Institute of Industrial Science, The University of Tokyo.
- * All rights reserved.
- *
- * Copyright (c) 2012-2013 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 #include "mpi.h"
@@ -164,29 +167,29 @@ bool SetVectorData(const int dataClassId[3], const int vc, const unsigned int st
 	return true;
 }
 
-BoundingBox defineSearchRegion(const Pedigree& pedigree, int maxLevel, 
+BoundingBox defineSearchRegion(const Pedigree& pedigree, int maxLevel,
                                const Vec3d& origin, const double rootLength, const RootGrid* rootGrid)
 {
 	int level = pedigree.getLevel();
 	int px = pedigree.getX();
 	int py = pedigree.getY();
 	int pz = pedigree.getZ();
-	
+
 	int rootID = pedigree.getRootID();
 	int ix = rootGrid->rootID2indexX(rootID);
 	int iy = rootGrid->rootID2indexY(rootID);
 	int iz = rootGrid->rootID2indexZ(rootID);
-	
+
 	int max0 = pedigree.getUpperBound() - 1;  // 2^level - 1
 	double d = 1.0 / (max0 + 1);  // ブロックサイズ
-	
+
 	double x0 = ix + px * d;
 	double y0 = iy + py * d;
 	double z0 = iz + pz * d;
 	double x1 = ix + (px + 1) * d;
 	double y1 = iy + (py + 1) * d;
 	double z1 = iz + (pz + 1) * d;
-	
+
 	// リップル効果対策用のマージン設定
 	if (level < maxLevel) {
 	  int n = 1 << (maxLevel - level - 1);
@@ -198,7 +201,7 @@ BoundingBox defineSearchRegion(const Pedigree& pedigree, int maxLevel,
 	  if (!(py == max0 && rootGrid->isOuterBoundary(rootID, Y_P))) y1 += dd;
 	  if (!(pz == max0 && rootGrid->isOuterBoundary(rootID, Z_P))) z1 += dd;
 	}
-	
+
 	// 原点移動，スケーリング
 	x0 = origin.x + x0 * rootLength;
 	y0 = origin.y + y0 * rootLength;
@@ -206,7 +209,7 @@ BoundingBox defineSearchRegion(const Pedigree& pedigree, int maxLevel,
 	x1 = origin.x + x1 * rootLength;
 	y1 = origin.y + y1 * rootLength;
 	z1 = origin.z + z1 * rootLength;
-	
+
 	return BoundingBox(x0, y0, z0, x1, y1, z1);
 }
 
@@ -245,7 +248,7 @@ int main(int argc, char** argv)
 				comm.Abort(EX_OPEN_FILE);
 			}
 		}
-		
+
 		/*
 		const std::string& polygonGroup = conf.polygonGroupList[0].polygonGroupName;
 		PolylibNS::Vec3f min(-150.0, -13.4, -300.0);
@@ -295,11 +298,11 @@ int main(int argc, char** argv)
 
 	BoundaryConditionSetter* boundaryConditionSetter = new BoundaryConditionSetter(&conf);
 
-	BlockFactory* blockFactory = new BlockFactory(tree, 
-	                                              partition, 
+	BlockFactory* blockFactory = new BlockFactory(tree,
+	                                              partition,
 	                                              boundaryConditionSetter,
-												  conf.origin, 
-												  conf.rootLength, 
+												  conf.origin,
+												  conf.rootLength,
 												  size);
 
 
@@ -342,7 +345,7 @@ int main(int argc, char** argv)
 	if (myRank == 0) {
 		BlockBoundingBox bbb(tree, conf.origin, conf.rootLength, size, conf.vc);
 		for (int iRank = 0; iRank < comm.Get_size(); iRank++) {
-		
+
 			// ランクiRankに属するブロック群のバインディングボックスを決定
 			BoundingBox box;
 			for (int id = partition->getStart(iRank); id < partition->getEnd(iRank); id++) {
@@ -350,11 +353,11 @@ int main(int argc, char** argv)
 				box.addBox(bbb.getBoundingBox(node));
 			}
 			// std::cout << iRank << ": " << box << std::endl;
-		
+
 			// Polylibにバウンディングボックス情報をと登録
 			pl->set_bounding_box(iRank, box);
 		}
-		
+
 		// ポリゴンデータを各ランクに送信
 		pl->send_to_all();
 	}
@@ -390,7 +393,7 @@ int main(int argc, char** argv)
 		polygonList = pl->search_polygons(polygonGroup, bmin, bmax, false);
 		nPolygons = polygonList->size();
 		delete polygonList;
-		
+
 		if( nPolygons > 0 ){
 			double dx = rgn.x / (double)(sz.x);
 			double dy = rgn.y / (double)(sz.y);
@@ -430,7 +433,7 @@ int main(int argc, char** argv)
 	Vec3d region( conf.rootLength * conf.rootN.x,
 	              conf.rootLength * conf.rootN.y,
 				  conf.rootLength * conf.rootN.z);
-	
+
 	BCMFileIO::IdxUnit unit;
 	unit.length   = std::string("m");
 	unit.L0_scale = 1.0;
@@ -448,7 +451,7 @@ int main(int argc, char** argv)
 	BCMFileIO::BCMFileSaver saver(origin, region, tree, "out");
 	// リーフブロック情報を登録 (CellID)
 	saver.RegisterCellIDInformation(id_cellId, 5, conf.vc, "CellID", "cid", "lb", "cid");
-	
+
 	int id_s32 = blockManager.setDataClass< Scalar3D<float > >(conf.vc);
 	int id_s64 = blockManager.setDataClass< Scalar3D<double> >(conf.vc);
 
@@ -475,7 +478,7 @@ int main(int argc, char** argv)
 	saver.Save();
 	// リーフブロックファイルを出力 (cid.lb)
 	saver.SaveLeafBlock("CellID");
-	
+
 	const std::list<unsigned int>* tmpStepList = tmpStep.GetStepList();
 	for(std::list<unsigned int>::const_iterator it = tmpStepList->begin(); it != tmpStepList->end(); ++it){
 		// 各データに適当な値を書き込み
@@ -483,7 +486,7 @@ int main(int argc, char** argv)
 		SetScalarData<double>(id_s64, conf.vc, *it);
 		SetVectorData<float >(id_v32, conf.vc, *it);
 		SetVectorData<double>(id_v64, conf.vc, *it);
-		
+
 		/*
 		// 各データの中身をテキストファイルに出力 (for debug)
 		char prefix[128];
@@ -517,4 +520,3 @@ int main(int argc, char** argv)
 
 	return EX_SUCCESS;
 }
-

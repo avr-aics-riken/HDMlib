@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 
@@ -94,7 +100,7 @@
 　// インデックスファイルとOctreeファイルを出力
 　// 登録されたデータ(CellID/Data)の情報とOctreeをファイルに保存
 　saver.Save();
-　             
+　
 　// リーフブロックファイルを出力
 　saver.SaveLeafBlock("CellID");        // 出力するデータの系の名称
 　saver.SaveLeafBlock("Temprature", 0); // 出力するデータの系の名称, タイムステップ番号

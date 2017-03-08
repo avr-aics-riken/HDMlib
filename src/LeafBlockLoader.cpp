@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -59,7 +65,7 @@ namespace BCMFileIO {
 			BSwap64(&hdr.numBlock);
 		}
 
-		//Logger::Info("Header [bw : %d, vc : %d, sz : (%3d, %3d, %3d), nb : %d\n", 
+		//Logger::Info("Header [bw : %d, vc : %d, sz : (%3d, %3d, %3d), nb : %d\n",
 		//       hdr.bitWidth, hdr.vc, hdr.size[0], hdr.size[1], hdr.size[2], hdr.numBlock);
 
 		return true;
@@ -78,7 +84,7 @@ namespace BCMFileIO {
 		}
 		return true;
 	}
-	
+
 	inline bool LeafBlockLoader::LoadCellIDData( FILE *fp, unsigned char** data, const LBHeader& hdr, const LBCellIDHeader& chdr, const bool isNeedSwap)
 	{
 		size_t sz = 0;
@@ -106,26 +112,26 @@ namespace BCMFileIO {
 				}
 			}
 		}
-		
+
 		return true;
 	}
 
-	bool LeafBlockLoader::LoadCellID( const std::string&          dir, 
-									  const IdxBlock*             ib, 
-									  const MPI::Intracomm&       comm, 
+	bool LeafBlockLoader::LoadCellID( const std::string&          dir,
+									  const IdxBlock*             ib,
+									  const MPI::Intracomm&       comm,
 									  PartitionMapper*            pmapper,
-									  LBHeader&                   header, 
+									  LBHeader&                   header,
 									  std::vector<CellIDCapsule>& cidCapsules )
 	{
 		using namespace std;
 
 		cidCapsules.clear();
-		
+
 		vector<PartitionMapper::FDIDList> fdidlists;
 		pmapper->GetFDIDLists(comm.Get_rank(), fdidlists);
 
 		cidCapsules.reserve(fdidlists.size());
-		
+
 		bool err = false;
 
 		for(vector<PartitionMapper::FDIDList>::const_iterator file = fdidlists.begin(); file != fdidlists.end(); ++file){
@@ -141,7 +147,7 @@ namespace BCMFileIO {
 			}
 
 			bool isNeedSwap = false;
-			
+
 			LBHeader hdr;
 
 			if( !LoadHeader(fp, hdr, isNeedSwap) ){
@@ -162,7 +168,7 @@ namespace BCMFileIO {
 			if( !LoadCellIDHeader(fp, cc.header, isNeedSwap) ){
 				fclose(fp); err = true; break;
 			}
-			
+
 			LoadCellIDData(fp, &cc.data, hdr, cc.header, isNeedSwap);
 
 			cidCapsules.push_back(cc);
@@ -183,11 +189,11 @@ namespace BCMFileIO {
 		return true;
 	}
 
-	bool LeafBlockLoader::LoadCellID_Gather( const std::string&        dir, 
-													const IdxBlock*           ib, 
-													const MPI::Intracomm&     comm, 
+	bool LeafBlockLoader::LoadCellID_Gather( const std::string&        dir,
+													const IdxBlock*           ib,
+													const MPI::Intracomm&     comm,
 													PartitionMapper*          pmapper,
-													LBHeader&                 header, 
+													LBHeader&                 header,
 													std::vector<CellIDCapsule>& cidCapsules )
 	{
 		using namespace std;
@@ -206,14 +212,14 @@ namespace BCMFileIO {
 			FILE *fp = NULL;
 			if( (fp = fopen(filepath.c_str(), "rb")) == NULL ){
 				printf("err : file open error \"%s\" [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
-				
+
 				// ファイルロードエラーを全プロセスに通知
 				unsigned char loadError = 1; comm.Bcast(&loadError, 1, MPI::CHAR, 0);
 				return false;
 			}
 
 			bool isNeedSwap = false;
-			
+
 			LBHeader hdr;
 
 			if( !LoadHeader(fp, hdr, isNeedSwap) ){
@@ -269,15 +275,15 @@ namespace BCMFileIO {
 			}
 
 			fclose(fp);
-			
-			// ファイルロード完了を全プロセスに通知	
+
+			// ファイルロード完了を全プロセスに通知
 			unsigned char loadError = 0; comm.Bcast(&loadError, 1, MPI::CHAR, 0);
 
-			// ヘッダ情報をブロードキャスト	
+			// ヘッダ情報をブロードキャスト
 			comm.Bcast(&header, sizeof(LBHeader), MPI::CHAR, 0);
 			// Gridヘッダ情報をブロードキャスト
 			comm.Bcast(&chs[0], wnp * sizeof(LBCellIDHeader), MPI::CHAR, 0);
-			
+
 			// 各計算ノードにデータを送信
 			for(int i = 1; i < comm.Get_size(); i++){
 				vector<PartitionMapper::FDIDList> fdidlists;
@@ -295,7 +301,7 @@ namespace BCMFileIO {
 					comm.Send(contents[file->FID], sz, MPI::CHAR, i, tag);
 				}
 			}
-			
+
 			// Rank 0用のデータコピー
 
 			bool *freeMask = new bool[wnp];
@@ -310,7 +316,7 @@ namespace BCMFileIO {
 				cidCapsules.push_back(cc);
 				freeMask[file->FID] = false;
 			}
-			
+
 			// 不要なデータを解放
 			for(int i = 0; i < wnp; i++){
 				if(freeMask[i]) delete [] contents[i];
@@ -334,7 +340,7 @@ namespace BCMFileIO {
 			int wnp = pmapper->GetWriteProcs();
 			vector<LBCellIDHeader> chs(wnp);
 			comm.Bcast(&chs[0], wnp * sizeof(LBCellIDHeader), MPI::CHAR, 0);
-			
+
 			vector<PartitionMapper::FDIDList> fdidlists;
 			pmapper->GetFDIDLists(rank, fdidlists);
 			for(vector<PartitionMapper::FDIDList>::iterator file = fdidlists.begin(); file != fdidlists.end(); ++file){
@@ -347,7 +353,7 @@ namespace BCMFileIO {
 					sz = chs[file->FID].compSize;
 				}
 				cc.data = new unsigned char[sz];
-				
+
 				// 受信
 				int tag = file->FID;
 				comm.Recv(cc.data, sz, MPI::CHAR, 0, tag);
@@ -384,14 +390,14 @@ namespace BCMFileIO {
 	}
 
 	////////////////////////////////////////////////////////////////////////
-	
+
 	unsigned char* LeafBlockLoader::Load_BlockContents(FILE *fp, const LBHeader& hdr, const Vec3i& bsz, const int vc, const bool isNeedSwap)
 	{
 		const static size_t typeByteTable[10] = { 1, 1, 2, 2, 4, 4, 8, 8, 4, 8 };
 		static void (*BSwap[10])(void*) = { DUMMY, DUMMY, BSwap16, BSwap16, BSwap32, BSwap32, BSwap64, BSwap64, BSwap32, BSwap64 };
 
 		size_t typeByte = typeByteTable[hdr.dataType];
-		
+
 		Vec3i ibsz( bsz.x + vc*2,     bsz.y + vc*2,     bsz.z + vc*2);
 		Vec3i fbsz( bsz.x + hdr.vc*2, bsz.y + hdr.vc*2, bsz.z + hdr.vc*2);
 
@@ -427,7 +433,7 @@ namespace BCMFileIO {
 				}
 			}
 		}
-		
+
 		delete [] buf;
 		return block;
 	}
@@ -444,7 +450,7 @@ namespace BCMFileIO {
 		pmapper->GetFDIDLists(comm.Get_rank(), fdidlists);
 
 		Vec3i bsz = blockManager.getSize();
-		
+
 		int did = 0;
 		for(vector<PartitionMapper::FDIDList>::iterator file = fdidlists.begin(); file != fdidlists.end(); ++file){
 			char filename[128];
@@ -458,13 +464,13 @@ namespace BCMFileIO {
 			}
 
 			string filepath = dirpath + string(filename);
-			
+
 			FILE *fp = NULL;
 			if( (fp = fopen(filepath.c_str(), "rb")) == NULL ) {
 				Logger::Error("Cannnot open file (%s) [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				return false;
 			}
-			
+
 			bool isNeedSwap = false;
 			LBHeader hdr;
 
@@ -493,7 +499,7 @@ namespace BCMFileIO {
 				     filepath.c_str(), hdr.size[0], hdr.size[1], hdr.size[2], bsz.x, bsz.y, bsz.z, __FILE__, __LINE__);
 				return false;
 			}
-			
+
 			const static size_t typeByteTable[10] = { 1, 1, 2, 2, 4, 4, 8, 8, 4, 8 };
 			size_t typeByte = typeByteTable[hdr.dataType];
 			Vec3i fbsz( bsz.x + hdr.vc*2, bsz.y + hdr.vc*2, bsz.z + hdr.vc*2);
@@ -529,4 +535,3 @@ namespace BCMFileIO {
 	}
 
 } // BCMFileIO
-

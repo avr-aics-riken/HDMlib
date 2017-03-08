@@ -1,15 +1,21 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
 /// @file  BCMFileLoader.cpp
 /// @brief BCMファイルを読み込むクラス
-/// 
+///
 
 #include "BCMFileLoader.h"
 
@@ -55,11 +61,11 @@ namespace BCMFileIO {
 	   m_octree(NULL),
 	   m_pmapper(NULL)
 	{
-		
+
 		std::string dir = FileSystemUtil:: GetDirectory(FileSystemUtil::ConvertPath(idxFilename));
-		
+
 		std::string octreeFilename;
-		if( ErrorUtil::reduceError( !LoadIndex(idxFilename, m_globalOrigin, m_globalRegion, octreeFilename, 
+		if( ErrorUtil::reduceError( !LoadIndex(idxFilename, m_globalOrigin, m_globalRegion, octreeFilename,
 		                            m_leafBlockSize, m_idxProcList, m_idxBlockList ) ) ){
 			Logger::Error("load index file error (%s) [%s:%d].\n", idxFilename.c_str(), __FILE__, __LINE__);
 			return;
@@ -119,7 +125,7 @@ namespace BCMFileIO {
 			}
 		}
 
-		
+
 		for(std::vector<IdxBlock>::iterator it = idxBlockList.begin(); it != idxBlockList.end(); ++it){
 			m_idxBlockList.push_back(*it);
 		}
@@ -133,8 +139,8 @@ namespace BCMFileIO {
 		using namespace std;
 		TextParser *tp = new TextParser;
 
-		if( tp->read(filename) != TP_NO_ERROR ) { 
-			Logger::Error("[%s:%d]\n", __FILE__, __LINE__); 
+		if( tp->read(filename) != TP_NO_ERROR ) {
+			Logger::Error("[%s:%d]\n", __FILE__, __LINE__);
 			delete tp;
 			return false;
 		}
@@ -150,7 +156,7 @@ namespace BCMFileIO {
 		// Read Proc Filename
 		string procFilename;
 		if( tp->getValue("ProcFile", procFilename) != TP_NO_ERROR ){
-			Logger::Error("[%s:%d]\n", __FILE__, __LINE__); 
+			Logger::Error("[%s:%d]\n", __FILE__, __LINE__);
 			delete tp;
 			return false;
 		}
@@ -189,7 +195,7 @@ namespace BCMFileIO {
 				return false;
 			}
 		}
-		
+
 		tp->changeNode("/LeafBlock" );
 		{
 			vector<string> nodes;
@@ -274,7 +280,7 @@ namespace BCMFileIO {
 			numProcs = atoi(valStr.c_str());
 		}
 
-		tp->changeNode("/process");		
+		tp->changeNode("/process");
 		vector<string> nodes;
 		tp->getNodes(nodes, 1);
 		for(vector<string>::iterator nit = nodes.begin(); nit != nodes.end(); ++nit){
@@ -306,11 +312,11 @@ namespace BCMFileIO {
 					}
 				}
 				procList.push_back(proc);
-				
+
 				tp->changeNode("../");
 			}
 		}
-		
+
 		if(procList.size() != numProcs){
 			Logger::Error("[%s:%d]\n", __FILE__, __LINE__);
 			delete tp;
@@ -321,15 +327,15 @@ namespace BCMFileIO {
 		delete tp;
 		return true;
 	}
-	
+
 	bool BCMFileLoader::LoadIndexStep(TextParser *tp, IdxStep* step)
 	{
 		using namespace std;
 		vector<string> lbls;
 		tp->getLabels(lbls);
-		
+
 		bool hasBase = false;
-		
+
 		for(vector<string>::iterator it = lbls.begin(); it != lbls.end(); ++it){
 			string valStr;
 			tp->getValue(*it, valStr);
@@ -556,7 +562,7 @@ namespace BCMFileIO {
 #ifdef OCTREE_LOAD_ONLY_MASTER
 		load_octree_only_master = true;
 #endif
-		
+
 		OctHeader header;
 		vector<Pedigree> pedigrees;
 
@@ -564,7 +570,7 @@ namespace BCMFileIO {
 		{
 			unsigned char loadError = 0;
 			if( myRank == 0 ){
-				if( !LoadOctreeFile(filename, header, pedigrees) ) loadError = 1; 
+				if( !LoadOctreeFile(filename, header, pedigrees) ) loadError = 1;
 			}
 
 			m_comm.Bcast(&loadError, 1, MPI::CHAR, 0);
@@ -580,7 +586,7 @@ namespace BCMFileIO {
 		{
 			if( ErrorUtil::reduceError( !LoadOctreeFile(filename, header, pedigrees)) ) return false;
 		}
-		
+
 
 		Vec3d rootRegion( header.rgn[0] / static_cast<double>(header.rootDims[0]),
 		                  header.rgn[1] / static_cast<double>(header.rootDims[1]),
@@ -591,11 +597,11 @@ namespace BCMFileIO {
 			Logger::Error("RootGrid is not regular hexahedron. [%s:%d]\n", __FILE__, __LINE__);
 			return false;
 		}
-		
+
 		RootGrid *rootGrid = new RootGrid(header.rootDims[0], header.rootDims[1], header.rootDims[2]);
 		m_octree  = new BCMOctree(rootGrid, pedigrees);
 		m_pmapper = new PartitionMapper(m_idxProcList.size(), numProcs, header.numLeaf);
-		
+
 		// Make and register Block
 		Partition part(numProcs, header.numLeaf);
 		BlockFactory factory(m_octree, &part, bcsetter, Vec3d(header.org), rootRegion.x, m_leafBlockSize);
@@ -701,7 +707,7 @@ namespace BCMFileIO {
 	}
 
 
-	bool BCMFileLoader::LoadLeafBlock(int *dataClassID, const std::string& name, const unsigned int vc, 
+	bool BCMFileLoader::LoadLeafBlock(int *dataClassID, const std::string& name, const unsigned int vc,
 	                                  const unsigned int step, const bool separateVCUpdate)
 	{
 		using namespace std;
@@ -711,7 +717,7 @@ namespace BCMFileIO {
 		bool err = false;
 
 		IdxBlock* ib = IdxBlock::find(m_idxBlockList, name);
-		
+
 		if( ib == NULL ){
 			Logger::Error("No such name as \"%s\" in loaded index.[%s:%d]\n", name.c_str(), __FILE__, __LINE__);
 			err = true;
@@ -740,7 +746,7 @@ namespace BCMFileIO {
 				}
 				return false;
 			}
-			
+
 			// MxNマッピング情報取得
 			vector<PartitionMapper::FDIDList> fdidlists;
 			m_pmapper->GetFDIDLists(myRank, fdidlists);
@@ -753,7 +759,7 @@ namespace BCMFileIO {
 
 				// rleおよびbitVoxelの圧縮を展開
 				unsigned char* voxels = LeafBlockLoader::DecompCellIDData( header, cidCapsules[fid] );
-				
+
 				// 展開したvoxelsからブロックごとにデータをコピー
 				for( vector<int>::iterator fdid = file->FDIDs.begin(); fdid != file->FDIDs.end(); ++fdid){
 					Vec3i ibsz( bsz.x + vc*2,     bsz.y + vc*2,     bsz.z + vc*2    );   // 内部ブロックサイズ (仮想セル込み)
@@ -761,7 +767,7 @@ namespace BCMFileIO {
 					unsigned char* block = new unsigned char[ibsz.x * ibsz.y * ibsz.z];  // データコピー用一時バッファを準備
 					memset(block, 0, sizeof(unsigned char) * ibsz.x * ibsz.y * ibsz.z);  // 一時バッファの0クリア
 					unsigned char *pv = &voxels[ (fbsz.x * fbsz.y * fbsz.z) * (*fdid) ];
-					
+
 					// ファイルから読み込んだCellIDを一時バッファにコピー (仮想セルサイズの不一致への対応)
 					if( vc > ib->vc ){
 						unsigned int vcd = vc - ib->vc;
@@ -939,7 +945,7 @@ namespace BCMFileIO {
 			Logger::Error("open file error(%s) [%s:%d].\n", filename.c_str(), __FILE__, __LINE__);
 			return false;
 		}
-		
+
 		bool isNeedSwap = false;
 		if( !LoadOctreeHeader(fp, header, isNeedSwap) ){
 			Logger::Error("Load Header error(%s) [%s:%d].\n", filename.c_str(), __FILE__, __LINE__);
@@ -961,4 +967,3 @@ namespace BCMFileIO {
 	}
 
 } // BCMFileIO
-

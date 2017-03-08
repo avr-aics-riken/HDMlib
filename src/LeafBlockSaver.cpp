@@ -1,9 +1,15 @@
 /*
- * HDMlib - Hierarchical Data Management library
- *
- * Copyright (c) 2014-2015 Advanced Institute for Computational Science, RIKEN.
- * All rights reserved.
- *
+###################################################################################
+#
+# HDMlib - Data management library for hierarchical Cartesian data structure
+#
+# Copyright (c) 2014-2017 Advanced Institute for Computational Science (AICS), RIKEN.
+# All rights reserved.
+#
+# Copyright (c) 2017 Research Institute for Information Technology (RIIT), Kyushu University.
+# All rights reserved.
+#
+###################################################################################
  */
 
 ///
@@ -82,7 +88,7 @@ namespace BCMFileIO {
 			ch.compSize = 0;
 			dp = reinterpret_cast<unsigned char*>(bitVoxel);
 		}
-		
+
 		if( ib->isGather ){ // GatherMode = "Gathered"
 			int *numBlockTable      = NULL;
 			int *leafBlockSizeTable = NULL;
@@ -97,10 +103,10 @@ namespace BCMFileIO {
 			comm.Gather(&bSz, 1, MPI::INT, leafBlockSizeTable, 1, MPI::INT, 0);
 			// 各ランクのデータサイズを集約
 			comm.Gather(&nb,  1, MPI::INT, numBlockTable,      1, MPI::INT, 0);
-			
+
 			unsigned char* rcvBuf = NULL;
 			int *displs = NULL;
-			
+
 			uint64_t allSz = 0;
 			if( rank == 0 ){
 				displs = new int[comm.Get_size()];
@@ -122,7 +128,7 @@ namespace BCMFileIO {
 					Logger::Error("fileopen error <%s>. [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 					return false;
 				}
-				
+
 				for(int i = 0; i < comm.Get_size(); i++){
 					header.numBlock += numBlockTable[i];
 				}
@@ -165,14 +171,14 @@ namespace BCMFileIO {
 				Logger::Error("fileopen error <%s>. [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 				return false;
 			}
-	
+
 			header.numBlock = numBlock;
-	
+
 			fwrite(&header, sizeof(LBHeader),     1, fp);
 			fwrite(&ch,     sizeof(LBCellIDHeader), 1, fp);
 
 			size_t dsz = ch.compSize == 0 ? bvs : ch.compSize;
-			
+
 			fwrite(dp, sizeof(unsigned char), dsz, fp);
 
 			fclose(fp);
@@ -180,7 +186,7 @@ namespace BCMFileIO {
 
 		delete [] bitVoxel;
 		if( rleBuf != NULL ) delete [] rleBuf;
-	
+
 		return true;
 	}
 
@@ -190,7 +196,7 @@ namespace BCMFileIO {
 	bool LeafBlockSaver::CopyScalar3DToBuffer(BlockManager& blockManager, const int dataClassID, const int dataID, const int vc, T* buf)
 	{
 		Vec3i size = blockManager.getSize();
-		
+
 		BlockBase* block = blockManager.getBlock(dataID);
 		Scalar3D<T>* mesh = dynamic_cast< Scalar3D<T>* >(block->getDataClass(dataClassID));
 		T* data      = mesh->getData();
@@ -210,8 +216,8 @@ namespace BCMFileIO {
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	template<typename T>
 	bool LeafBlockSaver::_SaveData(const MPI::Intracomm& comm,
-								   const IdxBlock*       ib, 
-								   BlockManager&         blockManager, 
+								   const IdxBlock*       ib,
+								   BlockManager&         blockManager,
 								   const unsigned int    step)
 	{
 		using namespace std;
@@ -232,14 +238,14 @@ namespace BCMFileIO {
 
 		int vc = ib->vc;
 		const size_t sz = (size.x + vc*2) * (size.y + vc*2) * (size.z + vc*2);
-		
+
 		string outputDir = ib->rootDir + ib->dataDir;
 		if(ib->isStepSubDir){
 			char stepDirName[128];
 			sprintf(stepDirName, "%010d/", step);
 			outputDir += std::string(stepDirName);
 		}
-		
+
 		FileSystemUtil::CreateDirectory(outputDir, outputDir.find("/") == 0 ? true : false);
 
 		FILE *fp = NULL;
@@ -247,14 +253,14 @@ namespace BCMFileIO {
 		sprintf(filename, "%s_%010d_%06d.%s", ib->prefix.c_str(), step, rank, ib->extension.c_str());
 
 		string filepath = outputDir + string(filename);
-		
+
 		if( (fp = fopen(filepath.c_str(), "wb")) == NULL){
 			Logger::Error("fileopen err <%s>. [%s:%d]\n", filepath.c_str(), __FILE__, __LINE__);
 			return false;
 		}
 
 		fwrite(&header, sizeof(header), 1, fp);
-		
+
 		for(int id = 0; id < blockManager.getNumBlock(); ++id){
 			for(int comp = 0; comp < static_cast<int>(ib->dataClassID.size()); comp++){
 				T* buf = new T[sz];
@@ -270,8 +276,8 @@ namespace BCMFileIO {
 	}
 
 	bool LeafBlockSaver::SaveData(const MPI::Intracomm& comm,
-								  const IdxBlock*       ib, 
-								  BlockManager&         blockManager, 
+								  const IdxBlock*       ib,
+								  BlockManager&         blockManager,
 								  const unsigned int    step)
 	{
 		bool status = false;
