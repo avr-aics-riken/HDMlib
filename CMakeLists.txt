@@ -19,6 +19,8 @@
 #
 # -D INSTALL_DIR=install_directory
 #
+# -D real_type={float|double}
+#
 # -D with_MPI={yes|no}
 #
 # -D enable_OPENMP={no|yes}
@@ -39,6 +41,7 @@ cmake_minimum_required(VERSION 2.6)
 # Build options
 #######
 
+option (real_type "Type of floating point" "OFF")
 option (enable_OPENMP "Enable OpenMP" "OFF")
 option (with_MPI "Enable MPI" "ON")
 option (with_example "Compiling examples" "OFF")
@@ -65,8 +68,8 @@ set (CMAKE_INSTALL_PREFIX "${INSTALL_DIR}")
 
 
 #######
-set(PROJECT_VERSION "1.0.0")
-set(LIB_REVISION "20170308_1600")
+set(PROJECT_VERSION "1.0.1")
+set(LIB_REVISION "20170309_1200")
 #######
 
 
@@ -90,30 +93,33 @@ AddOptimizeOption()
 
 checkOpenMP()
 
+precision()
+
 
 #######
 # Display options
 #######
 
 message(" ")
-message( STATUS "Destination PATH: "               ${CMAKE_INSTALL_PREFIX})
-message( STATUS "CMAKE_C_COMPILER: "               ${CMAKE_C_COMPILER})
-message( STATUS "CMAKE_C_FLAGS: "                  ${CMAKE_C_FLAGS})
-message( STATUS "CMAKE_CXX_COMPILER: "             ${CMAKE_CXX_COMPILER})
-message( STATUS "CMAKE_CXX_FLAGS: "                ${CMAKE_CXX_FLAGS})
+message( STATUS "Destination PATH       : "      ${CMAKE_INSTALL_PREFIX})
+message( STATUS "CMAKE_C_COMPILER       : "      ${CMAKE_C_COMPILER})
+message( STATUS "CMAKE_C_FLAGS          : "      ${CMAKE_C_FLAGS})
+message( STATUS "CMAKE_CXX_COMPILER     : "      ${CMAKE_CXX_COMPILER})
+message( STATUS "CMAKE_CXX_FLAGS        : "      ${CMAKE_CXX_FLAGS})
 
 if(enable_Fortran)
-  message( STATUS "CMAKE_Fortran_COMPILER: "         ${CMAKE_Fortran_COMPILER})
-  message( STATUS "CMAKE_Fortran_FLAGS: "            ${CMAKE_Fortran_FLAGS})
+  message( STATUS "CMAKE_Fortran_COMPILER : "      ${CMAKE_Fortran_COMPILER})
+  message( STATUS "CMAKE_Fortran_FLAGS    : "      ${CMAKE_Fortran_FLAGS})
 endif()
 
 message(" ")
-message( STATUS "MPI support       : "      ${with_MPI})
-message( STATUS "OpenMP support    : "      ${enable_OPENMP})
-message( STATUS "TextParser support: "      ${with_TP})
-message( STATUS "BCMTools support  : "      ${with_BCM})
-message( STATUS "Polylib support   : "      ${with_PL})
-message( STATUS "Example           : "      ${with_example})
+message( STATUS "Type of floating point : "      ${real_type})
+message( STATUS "MPI support            : "      ${with_MPI})
+message( STATUS "OpenMP support         : "      ${enable_OPENMP})
+message( STATUS "TextParser support     : "      ${with_TP})
+message( STATUS "BCMTools support       : "      ${with_BCM})
+message( STATUS "Polylib support        : "      ${with_PL})
+message( STATUS "Example                : "      ${with_example})
 message(" ")
 
 if(CMAKE_CXX_COMPILER MATCHES ".*FCCpx$")

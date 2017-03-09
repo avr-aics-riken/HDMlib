@@ -27,6 +27,7 @@
 #include <list>
 
 #include "BitVoxel.h"
+#include "Vec3.h"
 
 namespace BCMFileIO {
 
@@ -81,13 +82,13 @@ namespace BCMFileIO {
 		///
 		/// @param[in] time Step = 0における時刻
 		///
-		void SetInitalTime(float time);
+		void SetInitalTime(REAL_TYPE time);
 
 		/// Step間の時刻幅を設定
 		///
 		/// @param[in] deltaT Step間の時刻幅
 		///
-		void SetDeltaT(float deltaT);
+		void SetDeltaT(REAL_TYPE deltaT);
 
 		/// 設定したStepのリストを取得
 		///
@@ -130,13 +131,13 @@ namespace BCMFileIO {
 		///
 		/// @return Step = 0における時刻
 		///
-		float GetInitialTime() const;
+		REAL_TYPE GetInitialTime() const;
 
 		/// Step間の時間幅を取得
 		///
 		/// @return Step間の時間幅
 		///
-		float GetDeltaT() const;
+		REAL_TYPE GetDeltaT() const;
 
 	private:
 		unsigned int m_rangeMin;          ///< タイムステップレンジ (Min)
@@ -144,8 +145,8 @@ namespace BCMFileIO {
 		unsigned int m_rangeInterval;     ///< タイムステップレンジ (Interval)
 		std::vector<unsigned int> m_adds; ///< 追加タイムステップリスト
 		std::vector<unsigned int> m_subs; ///< 削除タイムステップリスト
-		float        m_time;              ///< Step = 0 における時刻
-		float        m_deltaT;            ///< Step間の時間幅
+		REAL_TYPE        m_time;              ///< Step = 0 における時刻
+		REAL_TYPE        m_deltaT;            ///< Step間の時間幅
 	};
 
 } // namespace BCMFileIO

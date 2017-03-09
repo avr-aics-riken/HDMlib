@@ -36,7 +36,7 @@ add_executable(creator
 )
 
 if(with_MPI)
-  target_link_libraries(creator -lHDMmpi -lBCMmpi -lPOLYmpi -lTPmpi)
+  target_link_libraries(creator -lHDMmpi -lBCMconfig -lBCMmpi -lPOLYmpi -lTPmpi)
   set (test_parameters -np 2
                       "creator"
                       "${PROJECT_SOURCE_DIR}/examples/SampleCreator/test.conf"
@@ -48,6 +48,25 @@ else()
 endif()
 
 
+configure_file(
+    ${PROJECT_SOURCE_DIR}/examples/SampleCreator/pato.stl
+    ${PROJECT_BINARY_DIR}/examples/SampleCreator/pato.stl
+    COPYONLY)
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/examples/SampleCreator/test.conf
+    ${PROJECT_BINARY_DIR}/examples/SampleCreator/test.conf
+    COPYONLY)
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/examples/SampleCreator/test.tp
+    ${PROJECT_BINARY_DIR}/examples/SampleCreator/test.tp
+    COPYONLY)
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/examples/SampleCreator/test.xml
+    ${PROJECT_BINARY_DIR}/examples/SampleCreator/test.xml
+    COPYONLY)
 
 ### Sample2 : Loader
 

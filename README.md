@@ -59,6 +59,9 @@ $ sudo make install
 
 >  Specify the directory that this library will be installed. Built library is installed at `install_directory/lib` and the header files are placed at `install_directory/include`. The default install directory is `/usr/local/HDMlib`.
 
+`-D real_type=` {float | double}
+
+>  Specify the type of floating point. If this option is omitted, the default is float.
 
 `-D with_MPI=` {yes | no}
 
@@ -96,7 +99,7 @@ In following exsmples, assuming that TextParser and BCMTools are installed under
 ### INTEL/GNU compiler
 
 ~~~
-$ cmake -DINSTALL_DIR=${HDM_HOME}/HDMlib -Dwith_MPI=yes -Denable_OPENMP=yes -Dwith_example=no -Dwith_TP=${HDM_HOME}/TextParser -Dwith_BCM=${HDM_HOME}/BCMTools -Dwith_PL=no ..
+$ cmake -DINSTALL_DIR=${HDM_HOME}/HDMlib -Dreal_type=float -Dwith_MPI=yes -Denable_OPENMP=yes -Dwith_example=no -Dwith_TP=${HDM_HOME}/TextParser -Dwith_BCM=${HDM_HOME}/BCMTools -Dwith_PL=no ..
 ~~~
 
 
@@ -105,6 +108,7 @@ $ cmake -DINSTALL_DIR=${HDM_HOME}/HDMlib -Dwith_MPI=yes -Denable_OPENMP=yes -Dwi
 ~~~
 $ cmake -DINSTALL_DIR=${HDM_HOME}/HDMlib \
             -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_fx10.cmake \
+            -Dreal_type=float \
             -Dwith_MPI=yes \
             -Denable_OPENMP=yes \
             -Dwith_example=no \
@@ -114,6 +118,7 @@ $ cmake -DINSTALL_DIR=${HDM_HOME}/HDMlib \
 
 $ cmake -DINSTALL_DIR=${HDM_HOME}/HDMlib \
             -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_fx100.cmake \
+             -Dreal_type=float \
             -Dwith_MPI=yes \
             -Denable_OPENMP=yes \
             -Dwith_example=no \
@@ -123,6 +128,7 @@ $ cmake -DINSTALL_DIR=${HDM_HOME}/HDMlib \
 
 $ cmake -DINSTALL_DIR=${HDM_HOME}/HDMlib \
             -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_K.cmake \
+            -Dreal_type=float \
             -Dwith_MPI=yes \
             -Denable_OPENMP=yes \
             -Dwith_example=no \

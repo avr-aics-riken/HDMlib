@@ -86,8 +86,8 @@ namespace BCMFileIO {
 
 	bool BCMFileLoader::LoadAdditionalIndex(const std::string& filepath)
 	{
-		Vec3d org;
-		Vec3d rgn;
+		Vec3r org;
+		Vec3r rgn;
 		std::string octname;
 		Vec3i blockSize;
 		std::vector<IdxProc>  idxProcList;
@@ -133,7 +133,7 @@ namespace BCMFileIO {
 		return true;
 	}
 
-	bool BCMFileLoader::LoadIndex(const std::string& filename, Vec3d& globalOrigin, Vec3d& globalRegion, std::string& octreeFilename,
+	bool BCMFileLoader::LoadIndex(const std::string& filename, Vec3r& globalOrigin, Vec3r& globalRegion, std::string& octreeFilename,
 	                              Vec3i& blockSize, std::vector<IdxProc>& idxProcList, std::vector<IdxBlock>& idxBlockList)
 	{
 		using namespace std;
@@ -588,9 +588,9 @@ namespace BCMFileIO {
 		}
 
 
-		Vec3d rootRegion( header.rgn[0] / static_cast<double>(header.rootDims[0]),
-		                  header.rgn[1] / static_cast<double>(header.rootDims[1]),
-					  	  header.rgn[2] / static_cast<double>(header.rootDims[2]) );
+		Vec3r rootRegion( header.rgn[0] / static_cast<REAL_TYPE>(header.rootDims[0]),
+		                  header.rgn[1] / static_cast<REAL_TYPE>(header.rootDims[1]),
+					  	  header.rgn[2] / static_cast<REAL_TYPE>(header.rootDims[2]) );
 
 		if( fabs(rootRegion.x - rootRegion.y) >= 1.0e-10 || fabs(rootRegion.x - rootRegion.z) >= 1.0e-10 ) {
 			Logger::Error("%lf %lf %lf\n", rootRegion.x, rootRegion.y, rootRegion.z);
@@ -604,7 +604,7 @@ namespace BCMFileIO {
 
 		// Make and register Block
 		Partition part(numProcs, header.numLeaf);
-		BlockFactory factory(m_octree, &part, bcsetter, Vec3d(header.org), rootRegion.x, m_leafBlockSize);
+		BlockFactory factory(m_octree, &part, bcsetter, Vec3r(header.org), rootRegion.x, m_leafBlockSize);
 
 		vector<Node*>& leafNodeArray = m_octree->getLeafNodeArray();
 		for(int id = part.getStart(myRank); id < part.getEnd(myRank); id++){
@@ -615,8 +615,8 @@ namespace BCMFileIO {
 
 		m_blockManager.endRegisterBlock();
 
-		m_globalOrigin = Vec3d(header.org);
-		m_globalRegion = Vec3d(header.rgn);
+		m_globalOrigin = Vec3r(header.org);
+		m_globalRegion = Vec3r(header.rgn);
 
 		return true;
 	}
@@ -850,7 +850,7 @@ namespace BCMFileIO {
 		return lstr1.compare(lstr2);
 	}
 
-	int BCMFileLoader::ReadVec3( TextParser* tp, const std::string& label, Vec3d& v)
+	int BCMFileLoader::ReadVec3( TextParser* tp, const std::string& label, Vec3r& v)
 	{
 		using namespace std;
 
@@ -862,10 +862,10 @@ namespace BCMFileIO {
 		if( (err = tp->getValue(label, valStr)) != TP_NO_ERROR){ return err; }
 		tp->splitVector(valStr, vec_valStr);
 
-		Vec3d ret_v;
-		ret_v.x = tp->convertDouble(vec_valStr[0], &err);
-		ret_v.y = tp->convertDouble(vec_valStr[1], &err);
-		ret_v.z = tp->convertDouble(vec_valStr[2], &err);
+		Vec3r ret_v;
+		ret_v.x = (REAL_TYPE)tp->convertDouble(vec_valStr[0], &err);
+		ret_v.y = (REAL_TYPE)tp->convertDouble(vec_valStr[1], &err);
+		ret_v.z = (REAL_TYPE)tp->convertDouble(vec_valStr[2], &err);
 
 		v = ret_v;
 

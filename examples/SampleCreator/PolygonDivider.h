@@ -41,7 +41,7 @@ class PolygonDivider : public MultiRootDivider {
 
 public:
 
-  PolygonDivider(const Vec3d& origin, double rootLength, const RootGrid* rootGrid,
+  PolygonDivider(const Vec3r& origin, double rootLength, const RootGrid* rootGrid,
                  int minLevel, const PolylibNS::BCMPolylib* pl,
                  const std::vector<PolygonGroupSpec>& polygonGroupList,
                  const std::vector<BoundingBoxSpec>& boundingBoxList,

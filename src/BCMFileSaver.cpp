@@ -46,7 +46,7 @@ using namespace Vec3class;
 
 namespace BCMFileIO {
 
-	BCMFileSaver::BCMFileSaver( const Vec3d& globalOrigin, const Vec3d& globalRegion, const BCMOctree* octree, const std::string dir )
+	BCMFileSaver::BCMFileSaver( const Vec3r& globalOrigin, const Vec3r& globalRegion, const BCMOctree* octree, const std::string dir )
 	 : m_blockManager(BlockManager::getInstance()), m_comm(m_blockManager.getCommunicator()),
 	   m_octree(octree), m_globalOrigin(globalOrigin), m_globalRegion(globalRegion)
 	{

@@ -90,14 +90,14 @@ namespace BCMFileIO {
 
 	// #############################################################
 	// Step = 0における時刻を設定
-	void IdxStep::SetInitalTime(float time)
+	void IdxStep::SetInitalTime(REAL_TYPE time)
 	{
 		m_time   = time;
 	}
 
 	// #############################################################
 	// Step間の時刻幅を設定
-	void IdxStep::SetDeltaT(float deltaT)
+	void IdxStep::SetDeltaT(REAL_TYPE deltaT)
 	{
 		m_deltaT = deltaT;
 	}
@@ -166,14 +166,14 @@ namespace BCMFileIO {
 
 	// #############################################################
 	// Step = 0における時刻を取得
-	float IdxStep::GetInitialTime() const
+	REAL_TYPE IdxStep::GetInitialTime() const
 	{
 		return m_time;
 	}
 
 	// #############################################################
 	// Step間の時間幅を取得
-	float IdxStep::GetDeltaT() const
+	REAL_TYPE IdxStep::GetDeltaT() const
 	{
 		return m_deltaT;
 	}

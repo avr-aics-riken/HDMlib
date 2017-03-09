@@ -2,6 +2,22 @@
 
 
 ## REVISION HISTORY
+
+---
+- 2017-03-07  Version 1.0.1
+  - Introduction of real_type
+  - Vec3d >> Vec3r
+    - src/BCMFileSaver.cpp, BCMFileLoader.cpp
+    - include/BCMFileSaver.h, BCMFileLoader.h
+  - double >> REAL_TYPE
+    - src/BCMFileLoader.cpp, except TextParser args
+    - include/BCMFileLoader.h, BCMFileCommon.h
+  - float >> REAL_TYPE
+    - src/IdxStep.cpp
+    - include/IdxStep.h
+  - add Vec3.h
+    - BCMFileCommon.h, IdxStep.h
+
 ---
 - 2017-03-07  Version 1.0.0
   - Examples are still working
