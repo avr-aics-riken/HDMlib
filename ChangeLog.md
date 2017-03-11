@@ -4,6 +4,12 @@
 ## REVISION HISTORY
 
 ---
+- 2017-03-07  Version 1.0.2
+  - Rename to case-sensitive filename.
+  - Merge pull request #6 from syoyo/case-sensitive
+
+  
+---
 - 2017-03-07  Version 1.0.1
   - Introduction of real_type
   - Vec3d >> Vec3r
