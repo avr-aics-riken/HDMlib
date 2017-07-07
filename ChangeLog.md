@@ -4,6 +4,11 @@
 ## REVISION HISTORY
 
 ---
+- 2017-07-07  Version 1.0.3
+   - set(CMAKE_FIND_ROOT_PATH /opt/FJSVtclang/1.2.0) in Toolchain_K.cmake
+
+
+---
 - 2017-03-07  Version 1.0.2
   - Rename to case-sensitive filename.
   - Merge pull request #6 from syoyo/case-sensitive
